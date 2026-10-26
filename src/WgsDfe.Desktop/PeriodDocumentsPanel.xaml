@@ -1,0 +1,32 @@
+<UserControl x:Class="WgsDfe.Desktop.PeriodDocumentsPanel" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:WgsDfe.Desktop">
+ <Grid Margin="2"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+ <StackPanel x:Name="PeriodFilters" Margin="0,0,0,2">
+  <TextBlock Text="PERÍODO DE EMISSÃO &amp; JANELA DE CONSULTA DO ACERVO" Style="{StaticResource Eyebrow}" Margin="2,0,0,2"/>
+  <Border Background="#F7F6F2" BorderBrush="#E2DFD7" BorderThickness="1" CornerRadius="10" Padding="8,4">
+   <WrapPanel VerticalAlignment="Center">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,1,6,1">
+     <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#E08A34" VerticalAlignment="Center" Margin="2,0,6,0"/>
+     <TextBlock Text="De" FontSize="11.5" FontWeight="SemiBold" Foreground="#646059" VerticalAlignment="Center" Margin="0,0,5,0"/>
+     <DatePicker x:Name="FromDate" Width="122" SelectedDateFormat="Short" VerticalAlignment="Center"/>
+     <TextBlock Text="→" FontSize="12" FontWeight="Bold" Foreground="#E08A34" VerticalAlignment="Center" Margin="6,0"/>
+     <TextBlock Text="Até" FontSize="11.5" FontWeight="SemiBold" Foreground="#646059" VerticalAlignment="Center" Margin="0,0,5,0"/>
+     <DatePicker x:Name="ToDate" Width="122" SelectedDateFormat="Short" VerticalAlignment="Center"/>
+    </StackPanel>
+    <Border Width="1" Height="22" Background="#DFDCD3" Margin="4,0,8,0" VerticalAlignment="Center"/>
+    <Border Background="#ECE9E1" BorderBrush="#DFDCD3" BorderThickness="1" CornerRadius="8" Padding="3,2" Margin="0,1,8,1" VerticalAlignment="Center">
+     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+      <Button x:Name="ChipToday" Content="Hoje" Style="{StaticResource PeriodChipButton}" Click="QuickPeriod_Click" CommandParameter="today" ToolTip="Filtrar notas emitidas hoje"/>
+      <Button x:Name="ChipWeek" Content="7 dias" Style="{StaticResource PeriodChipButton}" Click="QuickPeriod_Click" CommandParameter="week" ToolTip="Filtrar últimos 7 dias"/>
+      <Button x:Name="ChipMonth" Content="Mês atual" Tag="Active" Style="{StaticResource PeriodChipButton}" Click="QuickPeriod_Click" CommandParameter="month" ToolTip="Filtrar mês atual"/>
+      <Button x:Name="ChipAll" Content="Todo o acervo" AutomationProperties.Name="Todos os períodos" Style="{StaticResource PeriodChipButton}" Click="Clear_Click" ToolTip="Mostrar todas as datas do acervo"/>
+     </StackPanel>
+    </Border>
+    <Button Content="Filtrar notas já baixadas" local:Ui.Icon="&#xE71C;" Click="Search_Click" VerticalAlignment="Center" Padding="10,4" Margin="0,1,0,1"/>
+   </WrapPanel>
+  </Border>
+ </StackPanel>
+ <AdornerDecorator ClipToBounds="True" Grid.Row="1"><DataGrid RowHeight="38" x:Name="Documents" ClipToBounds="True" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Single" MouseDoubleClick="Documents_DoubleClick">
+ <DataGrid.Columns><DataGridTextColumn Header="EMISSÃO" Binding="{Binding IssueDateLabel}" Width="96" ElementStyle="{StaticResource CellText}" MinWidth="90"/><DataGridTemplateColumn Header="Nº / Série" Width="96" MinWidth="90"><DataGridTemplateColumn.CellTemplate><DataTemplate><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Number}" FontWeight="SemiBold" Style="{StaticResource CellText}"/><TextBlock Style="{StaticResource Caption}" FontSize="10.5"><Run Text="{Binding ModelLabel, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Series, Mode=OneWay}"/></TextBlock></StackPanel></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn><DataGridTextColumn Header="EMITENTE" Binding="{Binding IssuerName}" Width="*" MinWidth="130" ElementStyle="{StaticResource CellText}"/><DataGridTextColumn Header="DESTINATÁRIO" Binding="{Binding RecipientName}" Width="*" MinWidth="130" ElementStyle="{StaticResource CellText}"/><DataGridTextColumn Header="TOTAL (R$)" Binding="{Binding Total, StringFormat=N2}" Width="95" ElementStyle="{StaticResource CellText}" MinWidth="85"/><DataGridTemplateColumn Header="SITUAÇÃO" Width="142" MinWidth="130" CellTemplate="{StaticResource DocumentStatus}"/></DataGrid.Columns></DataGrid></AdornerDecorator>
+ <StackPanel Grid.Row="2" Margin="0,6,0,0"><DockPanel><WrapPanel DockPanel.Dock="Left" VerticalAlignment="Center"><Button Content="Exportar XMLs do período" local:Ui.Icon="&#xEDE1;" FontSize="12" Padding="10,4" Margin="0,0,6,0" Click="Export_Click" Style="{StaticResource PrimaryButton}"/><Button Content="Visualizar Nota (DANFE / XML)" local:Ui.Icon="&#xE8A5;" FontSize="12" Padding="10,4" Margin="0,0,6,0" Click="Details_Click"/><Button x:Name="Previous" Content="‹" FontSize="14" FontWeight="Bold" AutomationProperties.Name="Anterior" ToolTip="Página anterior" Padding="7,2" MinWidth="28" MinHeight="28" Margin="0,0,4,0" Click="Previous_Click"/><Button x:Name="Next" Content="›" FontSize="14" FontWeight="Bold" AutomationProperties.Name="Próxima" ToolTip="Próxima página" Padding="7,2" MinWidth="28" MinHeight="28" Margin="0" Click="Next_Click"/></WrapPanel><TextBlock x:Name="Count" TextWrapping="Wrap" Style="{StaticResource Caption}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,0,0,0" Text="Selecione uma empresa e consulte ou filtre as notas do acervo."/></DockPanel><TextBlock x:Name="Message" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers></Style></TextBlock.Style></TextBlock></StackPanel>
+ </Grid>
+</UserControl>

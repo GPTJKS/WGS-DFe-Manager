@@ -1,0 +1,2118 @@
+# PROMPT MESTRE — WGS DF-e MANAGER
+
+## 1. VISÃO GERAL DO PROJETO
+
+Desenvolver um sistema desktop privado para Windows destinado inicialmente ao uso interno de um escritório contábil brasileiro.
+
+Nome provisório do projeto:
+
+**WGS DF-e Manager**
+
+O sistema será responsável por consultar, baixar, armazenar, organizar, pesquisar, validar, exportar e recuperar documentos fiscais eletrônicos — DF-e — de múltiplas empresas clientes do escritório.
+
+Tipos de documentos inicialmente suportados:
+
+* NF-e — modelo 55
+* NFC-e — modelo 65
+* CT-e — modelo 57
+* CT-e OS — modelo 67
+* NFCom — modelo 62
+
+A aplicação deve permitir que o usuário selecione simultaneamente:
+
+* uma empresa;
+* várias empresas;
+* todas as empresas;
+
+e também selecione independentemente quais tipos de documentos deseja processar.
+
+Exemplo:
+
+Empresas:
+
+☑ Empresa A
+☑ Empresa B
+☑ Empresa C
+☐ Empresa D
+
+Documentos:
+
+☑ NF-e
+☐ NFC-e
+☑ CT-e
+☐ CT-e OS
+☑ NFCom
+
+Período:
+
+01/01/2026 até 31/01/2026
+
+O sistema deve então utilizar automaticamente as fontes disponíveis para obter os documentos solicitados.
+
+---
+
+# 2. OBJETIVO PRINCIPAL
+
+Eliminar a necessidade de acessar individualmente portais fiscais ou sistemas de terceiros para baixar XMLs das empresas do escritório.
+
+O programa deverá centralizar:
+
+1. cadastro de empresas;
+2. certificados digitais;
+3. consultas aos Web Services fiscais;
+4. armazenamento de XML;
+5. controle de NSU;
+6. recuperação histórica;
+7. identificação de documentos faltantes;
+8. exportação organizada;
+9. pesquisa de documentos;
+10. auditoria do acervo.
+
+O usuário final não deve precisar conhecer NSU, SOAP, schemas XML, endpoints ou regras técnicas.
+
+A interface deve ser simples.
+
+O usuário escolhe:
+
+**empresa + período + documento**
+
+e o sistema resolve tecnicamente a consulta.
+
+---
+
+# 3. PRINCÍPIOS DO PROJETO
+
+## 3.1. Segurança
+
+Dados fiscais e certificados são extremamente sensíveis.
+
+Priorizar armazenamento local.
+
+Nunca salvar senha de certificado em texto puro.
+
+Certificados A1 devem ser protegidos utilizando recursos seguros do Windows.
+
+Preferencialmente utilizar:
+
+* Windows DPAPI;
+* Windows Credential Manager;
+* Windows Certificate Store;
+
+ou mecanismo equivalente seguro.
+
+Não registrar senhas em logs.
+
+Não registrar tokens secretos em logs.
+
+Nunca enviar certificado digital para serviços externos, exceto quando isso for tecnicamente indispensável e explicitamente configurado pelo administrador.
+
+Toda comunicação externa deverá utilizar HTTPS/TLS.
+
+---
+
+## 3.2. Arquitetura modular
+
+Não acoplar o programa diretamente a apenas uma API.
+
+Criar uma arquitetura baseada em provedores/adaptadores.
+
+Exemplo conceitual:
+
+```text
+IDocumentProvider
+
+SefScProvider
+NfeDistribuicaoNacionalProvider
+CteProvider
+NfceProvider
+NfcomProvider
+HistoricalRecoveryProvider
+LocalArchiveProvider
+```
+
+Dessa forma, futuramente poderemos substituir ou acrescentar fontes sem reescrever o programa.
+
+---
+
+# 4. TECNOLOGIA PREFERENCIAL
+
+Desenvolver preferencialmente em:
+
+**C# + .NET moderno**
+
+Utilizar versão LTS/estável apropriada no momento do desenvolvimento.
+
+Interface preferencial:
+
+**WPF**
+
+ou alternativa moderna para Windows caso haja justificativa técnica clara.
+
+Banco de dados inicial:
+
+**SQLite**
+
+Utilizar ORM:
+
+**Entity Framework Core**
+
+Arquitetura sugerida:
+
+```text
+WgsDfe.Desktop
+WgsDfe.Application
+WgsDfe.Domain
+WgsDfe.Infrastructure
+WgsDfe.Providers
+WgsDfe.Database
+WgsDfe.Tests
+```
+
+Aplicar separação clara entre:
+
+* interface;
+* regras de negócio;
+* banco;
+* integração externa;
+* certificados;
+* armazenamento físico;
+* jobs automáticos.
+
+---
+
+# 5. MODO DE FUNCIONAMENTO INICIAL
+
+A primeira versão será:
+
+**single-office / uso interno**
+
+Não é necessário inicialmente:
+
+* cobrança;
+* assinatura mensal;
+* marketplace;
+* portal público;
+* multiusuário em nuvem;
+* sistema de pagamento.
+
+Entretanto, estruturar o código para permitir futuramente uma versão comercial.
+
+Não colocar regras específicas da WGS diretamente espalhadas pelo código.
+
+Criar conceito de:
+
+```text
+Organization
+```
+
+Mesmo que inicialmente exista apenas:
+
+```text
+Organization = WGS
+```
+
+Isso permitirá no futuro transformar o programa em multiempresa/multiescritório.
+
+---
+
+# 6. CADASTRO DE EMPRESAS
+
+Criar cadastro contendo no mínimo:
+
+* razão social;
+* nome fantasia;
+* CNPJ;
+* inscrição estadual;
+* UF;
+* município;
+* situação ativa/inativa;
+* certificado associado;
+* pasta de armazenamento;
+* tipos de documentos habilitados;
+* data da última sincronização;
+* último NSU por serviço;
+* observações;
+* status de conexão;
+* status de vínculo com o contador.
+
+Permitir:
+
+**Adicionar empresa**
+
+**Editar empresa**
+
+**Inativar empresa**
+
+**Excluir empresa**, mediante confirmação.
+
+**Importar empresas por XLSX/CSV.**
+
+Evitar duplicidade pelo CNPJ.
+
+---
+
+# 7. CERTIFICADOS DIGITAIS
+
+A primeira versão deve priorizar:
+
+**certificado A1**
+
+Formatos:
+
+```text
+.pfx
+.p12
+```
+
+Criar módulo:
+
+**Certificados Digitais**
+
+Exemplo:
+
+```text
+WGS ASSESSORIA CONTÁBIL
+
+Titular:
+CNPJ:
+
+Validade:
+01/02/2026 a 01/02/2027
+
+Status:
+✅ Válido
+
+Empresas vinculadas:
+184
+```
+
+Funções:
+
+* adicionar;
+* substituir;
+* remover;
+* testar;
+* visualizar validade;
+* mostrar alerta de vencimento;
+* associar às empresas.
+
+Nunca armazenar senha em texto simples.
+
+Preparar arquitetura para futuramente suportar certificado A3, mas não tornar A3 obrigatório na V1.
+
+---
+
+# 8. DOWNLOAD NORMAL DOS DOCUMENTOS
+
+Criar tela:
+
+# Baixar documentos
+
+## Empresas
+
+Campo de pesquisa.
+
+Checkbox individual.
+
+Botões:
+
+```text
+Selecionar todas
+Desmarcar todas
+Selecionar ativas
+```
+
+Permitir centenas de empresas.
+
+---
+
+## Documentos
+
+Checkboxes independentes:
+
+```text
+☑ NF-e
+☑ NFC-e
+☑ CT-e
+☑ CT-e OS
+☑ NFCom
+```
+
+---
+
+## Período
+
+```text
+Data inicial
+Data final
+```
+
+Atalhos:
+
+```text
+Mês atual
+Mês anterior
+Últimos 3 meses
+Ano atual
+Período personalizado
+```
+
+---
+
+## Ações
+
+```text
+ANALISAR
+BAIXAR
+CANCELAR
+```
+
+Antes do download, mostrar estimativa:
+
+```text
+Empresas selecionadas: 63
+
+NF-e: habilitado
+CT-e: habilitado
+
+Período:
+01/08/2026 a 31/08/2026
+```
+
+---
+
+# 9. SERVIÇO DE DISTRIBUIÇÃO SEF/SC
+
+Utilizar a documentação oficial fornecida no projeto.
+
+Existe um boletim técnico fornecido pelo usuário referente ao serviço de distribuição/download de documentos fiscais eletrônicos.
+
+Ler integralmente essa documentação antes de implementar.
+
+NÃO inventar:
+
+* URLs;
+* parâmetros;
+* schemas;
+* códigos de retorno;
+* limites;
+* layouts XML.
+
+Utilizar somente documentação oficial.
+
+O sistema deve implementar corretamente:
+
+* autenticação por certificado;
+* SOAP quando aplicável;
+* XML;
+* XSD;
+* GZip;
+* Base64;
+* NSU;
+* tratamento dos retornos;
+* controle de consumo.
+
+---
+
+# 10. CONTROLE DE NSU
+
+O usuário não deverá trabalhar manualmente com NSU.
+
+O sistema deverá manter internamente o último NSU processado para:
+
+```text
+Empresa
++
+Tipo de documento
++
+Provider
+```
+
+Exemplo:
+
+```text
+Empresa ABC
+
+NF-e
+Último NSU:
+000000000004285123
+
+Última sincronização:
+21/09/2026 20:14
+```
+
+Criar tabela específica para sincronização.
+
+Não reiniciar NSU desnecessariamente.
+
+Não solicitar repetidamente documentos já processados.
+
+Implementar controle transacional:
+
+somente atualizar o último NSU depois que a resposta for processada corretamente.
+
+---
+
+# 11. DOCUMENTOS RECENTES X DOCUMENTOS HISTÓRICOS
+
+O sistema deverá trabalhar com dois conceitos:
+
+## SINCRONIZAÇÃO NORMAL
+
+Usada para documentos ainda disponíveis nos Web Services oficiais.
+
+## RECUPERAÇÃO HISTÓRICA
+
+Usada para documentos antigos que não estejam mais disponíveis nos serviços normais.
+
+A interface poderá chamar isso de:
+
+```text
+Download normal
+Recuperação histórica
+```
+
+---
+
+# 12. RECUPERAÇÃO HISTÓRICA
+
+Criar módulo específico:
+
+# Recuperação Histórica
+
+Permitir importar:
+
+```text
+.xlsx
+.csv
+.txt
+```
+
+contendo chaves de acesso.
+
+Aceitar inclusive planilha contendo apenas:
+
+```text
+CHAVE
+```
+
+Não exigir que o usuário previamente classifique o documento.
+
+---
+
+# 13. INTERPRETAÇÃO DA CHAVE DE ACESSO
+
+Implementar parser da chave de acesso dos DF-e.
+
+A partir dela identificar, quando aplicável:
+
+* UF;
+* ano;
+* mês;
+* CNPJ emitente;
+* modelo;
+* série;
+* número;
+* tipo de emissão;
+* código numérico;
+* dígito verificador.
+
+Modelos principais:
+
+```text
+55 = NF-e
+57 = CT-e
+62 = NFCom
+65 = NFC-e
+67 = CT-e OS
+```
+
+Validar:
+
+* tamanho;
+* caracteres;
+* dígito verificador;
+* modelo;
+* CNPJ.
+
+Classificar automaticamente.
+
+---
+
+# 14. IMPORTAÇÃO DE PLANILHA DE CHAVES
+
+Depois da importação apresentar:
+
+```text
+Arquivo:
+chaves_2024.xlsx
+
+Linhas importadas:
+58.421
+
+Chaves válidas:
+58.102
+
+Duplicadas:
+291
+
+Inválidas:
+28
+```
+
+Classificação:
+
+```text
+NF-e         41.432
+NFC-e         9.514
+CT-e          6.984
+CT-e OS         102
+NFCom            70
+```
+
+Também separar por:
+
+* empresa;
+* ano;
+* mês;
+* CNPJ;
+* documento.
+
+---
+
+# 15. CONFERÊNCIA DO ACERVO
+
+Antes de solicitar um XML externamente, verificar se já existe no acervo.
+
+Fluxo:
+
+```text
+CHAVE
+ ↓
+XML já existe?
+ ↓
+SIM
+não baixar novamente
+ ↓
+marcar como disponível
+```
+
+Evitar custos e consultas desnecessárias.
+
+O hash do documento poderá ser utilizado para controle adicional de integridade.
+
+---
+
+# 16. PIPELINE DE RECUPERAÇÃO
+
+Criar mecanismo genérico de resolução.
+
+Exemplo:
+
+```text
+1. Recebe chave
+
+2. Verifica banco local
+
+3. Verifica arquivos físicos existentes
+
+4. Determina modelo do documento
+
+5. Verifica período
+
+6. Seleciona provider apropriado
+
+7. Tenta fonte oficial disponível
+
+8. Se não estiver disponível:
+   verifica provider histórico configurado
+
+9. Recupera XML
+
+10. Valida
+
+11. Salva
+
+12. Indexa
+
+13. Marca resultado
+```
+
+Não misturar essa lógica diretamente na interface.
+
+Criar serviço:
+
+```text
+DocumentResolutionService
+```
+
+---
+
+# 17. RECUPERAÇÃO HISTÓRICA DE NF-e E CT-e
+
+Preparar integração com provedores externos capazes de recuperar documentos antigos por chave de acesso.
+
+A arquitetura deve permitir provedores como:
+
+```text
+EspiaoProvider
+SiegProvider
+FutureProvider
+```
+
+Mas não prender a aplicação a nenhuma empresa específica.
+
+Criar interface semelhante a:
+
+```csharp
+IHistoricalDocumentProvider
+```
+
+Funções conceituais:
+
+```text
+CanHandle()
+SubmitKeys()
+GetStatus()
+DownloadRecoveredDocuments()
+```
+
+Credenciais de API deverão ficar fora do código-fonte.
+
+Nunca colocar:
+
+```text
+API KEY
+TOKEN
+PASSWORD
+```
+
+hardcoded.
+
+Usar configuração segura.
+
+---
+
+# 18. NFC-e HISTÓRICA
+
+Para a V1 considerar que NFC-e antiga possui disponibilidade histórica mais limitada.
+
+Se determinada NFC-e não puder ser recuperada:
+
+não tratar como erro geral do programa.
+
+Registrar:
+
+```text
+Status:
+Não disponível na fonte consultada
+```
+
+O fato de NFC-e histórica possuir limitações não deverá impedir o restante da recuperação.
+
+---
+
+# 19. IMPORTAÇÃO DE ACERVO ANTIGO
+
+Criar opção:
+
+# Importar XMLs existentes
+
+Permitir selecionar:
+
+* pasta;
+* subpastas;
+* ZIP;
+* múltiplos ZIPs;
+* XMLs individuais.
+
+O sistema deverá varrer recursivamente.
+
+Identificar automaticamente:
+
+* NF-e;
+* NFC-e;
+* CT-e;
+* CT-e OS;
+* NFCom;
+* eventos;
+* cancelamentos;
+* cartas de correção.
+
+Não depender do nome do arquivo.
+
+Analisar o conteúdo XML.
+
+---
+
+# 20. DEDUPLICAÇÃO
+
+Usar a chave de acesso como identificador principal do documento fiscal.
+
+Não criar múltiplos documentos principais para a mesma chave.
+
+Porém permitir armazenar eventos relacionados separadamente.
+
+Exemplo:
+
+```text
+NF-e
+422609...
+
+Eventos:
+
+Autorização
+Cancelamento
+CC-e 01
+CC-e 02
+Manifestação
+```
+
+---
+
+# 21. ESTRUTURA DO ACERVO FÍSICO
+
+Manter XML no disco.
+
+Exemplo:
+
+```text
+Dados
+ └── XML
+      └── 2026
+           └── 09
+                └── 12345678000190
+                     ├── NFe
+                     ├── NFCe
+                     ├── CTe
+                     ├── CTeOS
+                     ├── NFCom
+                     └── Eventos
+```
+
+Não depender exclusivamente do banco SQLite para guardar os XMLs.
+
+O banco deverá indexar e localizar os documentos.
+
+---
+
+# 22. BANCO DE DADOS
+
+Criar entidades principais como:
+
+```text
+Organization
+Company
+Certificate
+CertificateAssociation
+FiscalDocument
+FiscalDocumentEvent
+DocumentSyncState
+DocumentProvider
+DownloadJob
+DownloadJobItem
+HistoricalRecoveryJob
+HistoricalRecoveryItem
+ImportJob
+AuditLog
+ApplicationSetting
+```
+
+---
+
+# 23. FISCAL DOCUMENT
+
+Campos sugeridos:
+
+```text
+Id
+
+OrganizationId
+CompanyId
+
+AccessKey
+
+DocumentModel
+DocumentType
+
+IssuerCnpj
+RecipientCnpj
+
+IssuerName
+RecipientName
+
+IssueDate
+
+Year
+Month
+
+Series
+DocumentNumber
+
+TotalValue
+
+Status
+
+ProtocolNumber
+
+AuthorizationDate
+
+CancellationDate
+
+FilePath
+
+XmlHash
+
+Provider
+
+RetrievedAt
+
+CreatedAt
+UpdatedAt
+```
+
+Nem todos os campos serão obrigatórios para todos os modelos.
+
+---
+
+# 24. PESQUISA DE DOCUMENTOS
+
+Criar tela:
+
+# Documentos
+
+Permitir pesquisar por:
+
+* chave;
+* empresa;
+* CNPJ emitente;
+* CNPJ destinatário;
+* fornecedor;
+* número;
+* série;
+* período;
+* valor;
+* tipo;
+* status.
+
+Filtros:
+
+```text
+NF-e
+NFC-e
+CT-e
+CT-e OS
+NFCom
+```
+
+Status:
+
+```text
+Autorizado
+Cancelado
+Denegado
+Inutilizado
+Outro
+```
+
+---
+
+# 25. VISUALIZAÇÃO
+
+Ao abrir um documento mostrar:
+
+```text
+NF-e 123456
+
+Emitente:
+Fornecedor ABC
+
+Destinatário:
+Empresa XYZ
+
+Emissão:
+15/08/2026
+
+Valor:
+R$ 14.832,92
+
+Situação:
+Autorizada
+
+Chave:
+...
+```
+
+Ações:
+
+```text
+Abrir XML
+Abrir pasta
+Copiar chave
+Exportar XML
+```
+
+Não é necessário criar DANFE completo na primeira versão.
+
+Pode ser implementado futuramente.
+
+---
+
+# 26. EXPORTAÇÃO
+
+Criar módulo:
+
+# Exportar XML
+
+Selecionar:
+
+* empresas;
+* período;
+* documentos.
+
+Exemplo:
+
+```text
+Empresa ABC
+01/08/2026 a 31/08/2026
+
+☑ NF-e
+☑ CT-e
+```
+
+Exportar como:
+
+```text
+pasta
+ou
+ZIP
+```
+
+Permitir estrutura:
+
+```text
+CNPJ / Ano / Mês / Documento
+```
+
+ou formato compatível com software contábil futuramente.
+
+---
+
+# 27. DOMÍNIO SISTEMAS
+
+Preparar arquitetura para integração futura com Domínio Sistemas.
+
+Não implementar automação frágil sem documentação.
+
+Inicialmente fornecer exportação de XML organizada para importação pelo sistema contábil.
+
+No futuro avaliar:
+
+* APIs;
+* monitoramento de pastas;
+* integrações documentadas.
+
+---
+
+# 28. STATUS DE DOWNLOAD
+
+Durante processamento mostrar progresso em tempo real.
+
+Exemplo:
+
+```text
+Processando 38 de 184 empresas
+
+EMPRESA ABC
+
+NF-e
+238 encontrados
+224 novos
+14 existentes
+
+CT-e
+31 encontrados
+31 novos
+
+Erros:
+0
+```
+
+Barra de progresso.
+
+Permitir minimizar a janela sem cancelar o processo.
+
+---
+
+# 29. JOBS
+
+Toda operação grande deverá gerar um Job.
+
+Exemplo:
+
+```text
+DownloadJob
+```
+
+Status:
+
+```text
+Pending
+Running
+Completed
+CompletedWithWarnings
+Failed
+Cancelled
+```
+
+Permitir consultar histórico.
+
+---
+
+# 30. RETOMADA
+
+Se o programa fechar durante uma operação grande, não perder completamente o trabalho realizado.
+
+O Job deve poder ser:
+
+```text
+retomado
+```
+
+quando tecnicamente possível.
+
+Não baixar novamente milhares de documentos já processados.
+
+---
+
+# 31. LIMITES DOS WEB SERVICES
+
+Implementar controle de:
+
+* requisições por segundo;
+* concorrência;
+* timeout;
+* retries;
+* cooldown;
+* bloqueios;
+* códigos específicos da SEFAZ.
+
+Esses valores deverão ficar configuráveis.
+
+Não espalhar números fixos pelo código.
+
+Criar:
+
+```text
+ProviderRateLimitConfiguration
+```
+
+Implementar backoff adequado.
+
+Nunca criar loop agressivo contra SEFAZ.
+
+---
+
+# 32. SINCRONIZAÇÃO AUTOMÁTICA
+
+Depois da V1 manual estar estável, implementar modo automático.
+
+Exemplo:
+
+```text
+Sincronizar automaticamente:
+☑
+
+Horário:
+06:00
+18:00
+```
+
+ou conforme regras de disponibilidade de cada provider.
+
+O scheduler deverá respeitar cooldowns do Web Service.
+
+---
+
+# 33. DASHBOARD
+
+Criar dashboard simples.
+
+Exemplo:
+
+```text
+WGS DF-e Manager
+
+Empresas ativas:          184
+
+XML armazenados:      1.428.392
+
+NF-e novas hoje:          3.182
+NFC-e novas hoje:        12.281
+CT-e novos hoje:            842
+NFCom novas hoje:           216
+
+Última sincronização:
+22/09/2026 08:04
+
+Empresas com erro:
+3
+```
+
+---
+
+# 34. PENDÊNCIAS
+
+Criar painel:
+
+# Pendências
+
+Exemplo:
+
+```text
+Empresa ABC
+Certificado vencido
+
+Empresa DEF
+Sem vínculo contábil
+
+Empresa GHI
+SEFAZ indisponível
+
+Empresa JKL
+429 / limite temporário
+
+Empresa MNO
+XML histórico não localizado
+```
+
+---
+
+# 35. RELATÓRIO DE RECUPERAÇÃO HISTÓRICA
+
+Após importar chaves apresentar relatório.
+
+Exemplo:
+
+```text
+RECUPERAÇÃO 2024
+
+Total:
+48.921
+
+Já existentes:
+13.228
+
+Recuperados:
+34.801
+
+Não recuperados:
+892
+```
+
+Detalhar motivo dos não recuperados.
+
+Exemplo:
+
+```text
+fora da disponibilidade
+certificado ausente
+empresa não participante
+chave inválida
+provider indisponível
+documento inexistente
+erro de autorização
+```
+
+Permitir exportar o relatório em XLSX ou CSV.
+
+---
+
+# 36. VALIDAÇÃO DOS XMLs
+
+Não considerar qualquer texto recebido como documento válido.
+
+Validar:
+
+* XML bem formado;
+* modelo esperado;
+* chave correspondente;
+* protocolo quando aplicável;
+* CNPJ;
+* estrutura;
+* duplicidade.
+
+Quando possível validar contra XSD oficial.
+
+Não permitir que uma resposta HTML de erro seja salva como XML fiscal.
+
+---
+
+# 37. LOGS
+
+Criar logs técnicos.
+
+Nunca colocar:
+
+* senha;
+* certificado completo;
+* private key;
+* token de API.
+
+Utilizar níveis:
+
+```text
+INFO
+WARNING
+ERROR
+DEBUG
+```
+
+Logs devem ajudar a diagnosticar falhas de SEFAZ e APIs.
+
+---
+
+# 38. AUDITORIA
+
+Registrar ações importantes:
+
+```text
+Empresa cadastrada
+Empresa alterada
+Certificado substituído
+Download iniciado
+XML importado
+XML recuperado
+Exportação realizada
+```
+
+Na versão comercial isso será essencial.
+
+---
+
+# 39. BACKUP
+
+Criar funcionalidade de backup.
+
+Backup deverá considerar:
+
+* banco;
+* configurações;
+* XML;
+* metadados.
+
+Certificados deverão ser tratados separadamente de forma segura.
+
+Nunca gerar um ZIP inseguro contendo certificado A1 + senha.
+
+---
+
+# 40. RESTAURAÇÃO
+
+Criar futuramente rotina de restauração.
+
+A arquitetura deverá permitir mover o sistema para outro computador sem perder todo o acervo.
+
+---
+
+# 41. VERSÃO COMERCIAL FUTURA
+
+Não implementar agora recursos comerciais completos.
+
+Mas não tomar decisões arquiteturais que impeçam:
+
+* múltiplos escritórios;
+* múltiplos usuários;
+* login;
+* permissões;
+* licenciamento;
+* cobrança por empresa;
+* cobrança por XML;
+* cobrança por plano;
+* banco PostgreSQL;
+* servidor central;
+* armazenamento em nuvem;
+* API própria;
+* painel web.
+
+O Domain não deve depender de SQLite especificamente.
+
+---
+
+# 42. MULTITENANCY FUTURO
+
+Toda entidade relevante deverá estar preparada para possuir:
+
+```text
+OrganizationId
+```
+
+Mesmo que inicialmente exista somente uma organização.
+
+Evitar dados globais desnecessários.
+
+---
+
+# 43. PROVEDORES
+
+Criar conceito genérico:
+
+```text
+IDocumentProvider
+```
+
+Exemplo conceitual:
+
+```csharp
+public interface IDocumentProvider
+{
+    bool CanHandle(DocumentRequest request);
+
+    Task<ProviderResult> GetDocumentsAsync(
+        DocumentRequest request,
+        CancellationToken cancellationToken);
+}
+```
+
+E para histórico:
+
+```csharp
+public interface IHistoricalDocumentProvider
+{
+    bool CanHandle(DocumentType documentType);
+
+    Task<HistoricalSubmissionResult> SubmitAsync(...);
+
+    Task<HistoricalJobStatus> GetStatusAsync(...);
+
+    Task<IReadOnlyCollection<RecoveredDocument>> DownloadAsync(...);
+}
+```
+
+Não precisa usar exatamente essas assinaturas.
+
+O importante é preservar a abstração.
+
+---
+
+# 44. PRIORIDADE ENTRE FONTES
+
+Criar estratégia configurável.
+
+Exemplo:
+
+```text
+1 LocalArchiveProvider
+
+2 OfficialProvider
+
+3 HistoricalRecoveryProvider
+```
+
+Objetivo:
+
+usar a fonte gratuita/local primeiro.
+
+Somente utilizar uma API paga quando realmente necessário.
+
+---
+
+# 45. CUSTO DE API
+
+Se um provider histórico possuir cobrança por consulta/XML, controlar antes de chamar.
+
+Nunca recuperar novamente um documento já existente.
+
+Registrar:
+
+```text
+provider
+data
+documento
+resultado
+```
+
+Preparar estrutura para futuramente calcular custos de recuperação.
+
+---
+
+# 46. TESTES
+
+Criar testes unitários principalmente para:
+
+* parser da chave;
+* validação de DV;
+* identificação de modelo;
+* deduplicação;
+* filtros;
+* determinação de provider;
+* interpretação de XML;
+* NSU;
+* importação de planilha.
+
+Criar mocks para Web Services.
+
+Os testes automatizados não devem realizar milhares de consultas reais à SEFAZ.
+
+---
+
+# 47. AMBIENTE DE HOMOLOGAÇÃO
+
+Sempre que existir Web Service de homologação, utilizar durante desenvolvimento.
+
+Nunca usar produção desnecessariamente para testes repetitivos.
+
+Separar configurações:
+
+```text
+Homologação
+Produção
+```
+
+---
+
+# 48. CONFIGURAÇÕES
+
+Criar tela:
+
+# Configurações
+
+Seções:
+
+```text
+Geral
+Armazenamento
+Certificados
+SEFAZ
+Provedores históricos
+Automação
+Backup
+Logs
+```
+
+---
+
+# 49. EXPERIÊNCIA DO USUÁRIO
+
+O usuário do programa será profissional de contabilidade, não desenvolvedor.
+
+Nunca mostrar mensagens como:
+
+```text
+NullReferenceException
+HTTPClient TaskCanceled
+XMLNode not found
+```
+
+Mostrar:
+
+```text
+Não foi possível consultar a SEFAZ.
+
+Motivo:
+tempo limite da conexão.
+
+O sistema tentará novamente.
+```
+
+Permitir:
+
+```text
+Ver detalhes técnicos
+```
+
+para suporte.
+
+---
+
+# 50. NÃO FAZER
+
+Não utilizar scraping de portal como mecanismo principal.
+
+Não depender de CAPTCHA.
+
+Não automatizar navegador se existir Web Service oficial.
+
+Não salvar certificados de forma insegura.
+
+Não armazenar senhas em código.
+
+Não ignorar regras de consumo da SEFAZ.
+
+Não considerar consulta pública como API.
+
+Não usar endpoints não documentados sem necessidade.
+
+Não vincular todo o sistema a um único fornecedor comercial.
+
+Não apagar XML automaticamente.
+
+Não sobrescrever arquivos sem controle.
+
+Não inventar informações fiscais quando um XML estiver incompleto.
+
+---
+
+# 51. ESCOPO DA PRIMEIRA VERSÃO
+
+A primeira versão funcional deve possuir:
+
+### Empresas
+
+Cadastro manual.
+
+Importação XLSX/CSV.
+
+### Certificados
+
+A1.
+
+Teste.
+
+Validade.
+
+Associação às empresas.
+
+### NF-e
+
+Download utilizando fonte oficial disponível.
+
+NSU.
+
+Armazenamento.
+
+### CT-e
+
+Estrutura funcional equivalente conforme documentação oficial.
+
+### NFC-e
+
+Suporte através do provider oficial aplicável.
+
+### NFCom
+
+Suporte através do provider oficial aplicável.
+
+### Recuperação histórica
+
+Importação de planilha contendo chaves.
+
+Classificação.
+
+Deduplicação.
+
+Consulta ao acervo.
+
+Interface preparada para provider externo.
+
+### Acervo
+
+XML local.
+
+SQLite.
+
+Pesquisa.
+
+### Exportação
+
+Pasta/ZIP.
+
+---
+
+# 52. FASES DE DESENVOLVIMENTO
+
+Executar em fases.
+
+## FASE 1 — Fundação
+
+Criar:
+
+* solution;
+* projetos;
+* Domain;
+* banco;
+* migrations;
+* configurações;
+* logging.
+
+## FASE 2 — Empresas
+
+Cadastro.
+
+Importação.
+
+Pesquisa.
+
+## FASE 3 — Certificados
+
+A1.
+
+Segurança.
+
+Teste.
+
+## FASE 4 — Parser DF-e
+
+Chave.
+
+Modelos.
+
+XML.
+
+## FASE 5 — Acervo
+
+Importação de XML.
+
+Deduplicação.
+
+Pesquisa.
+
+## FASE 6 — NF-e
+
+Implementar Web Service conforme documentação oficial fornecida.
+
+## FASE 7 — CT-e
+
+Provider correspondente.
+
+## FASE 8 — NFC-e
+
+Provider correspondente.
+
+## FASE 9 — NFCom
+
+Provider correspondente.
+
+## FASE 10 — Recuperação histórica
+
+Planilha de chaves.
+
+Pipeline.
+
+Provider externo.
+
+## FASE 11 — Exportação
+
+ZIP/pastas.
+
+## FASE 12 — Automação
+
+Scheduler.
+
+Sincronização automática.
+
+---
+
+# 53. DESENVOLVIMENTO INCREMENTAL
+
+Não tentar criar todo o sistema em uma única alteração.
+
+A cada fase:
+
+1. implementar;
+2. compilar;
+3. testar;
+4. corrigir;
+5. documentar;
+6. só então continuar.
+
+Nunca deixar dezenas de arquivos quebrados para corrigir posteriormente.
+
+---
+
+# 54. DOCUMENTAÇÃO
+
+Criar na raiz:
+
+```text
+README.md
+ARCHITECTURE.md
+DATABASE.md
+PROVIDERS.md
+SECURITY.md
+DEVELOPMENT.md
+```
+
+Documentar decisões relevantes.
+
+---
+
+# 55. BANCO E MIGRATIONS
+
+Toda alteração de banco deverá utilizar migrations.
+
+Não exigir que o usuário apague o banco para atualizar versão.
+
+O sistema deverá evoluir mantendo dados existentes.
+
+---
+
+# 56. AUTOUPDATE FUTURO
+
+Preparar a aplicação para possuir atualizações de versão futuramente.
+
+Não implementar obrigatoriamente na primeira etapa.
+
+---
+
+# 57. INSTALLER
+
+Depois que a V1 estiver estável, gerar instalador Windows.
+
+Objetivo:
+
+```text
+WGS DF-e Manager Setup.exe
+```
+
+A máquina do usuário não deverá precisar instalar manualmente:
+
+* Visual Studio;
+* SDK;
+* Python;
+* Node;
+* banco de dados externo.
+
+---
+
+# 58. NOME E BRANDING
+
+Usar provisoriamente:
+
+**WGS DF-e Manager**
+
+Não dedicar esforço excessivo a branding nesta fase.
+
+Prioridade:
+
+funcionamento + segurança + confiabilidade.
+
+A futura versão comercial poderá ter outro nome.
+
+---
+
+# 59. CRITÉRIO DE SUCESSO DA V1
+
+A V1 será considerada funcional quando conseguirmos executar este fluxo real:
+
+```text
+Abrir WGS DF-e Manager
+
+↓
+
+Selecionar 20 empresas
+
+↓
+
+Selecionar:
+NF-e
+CT-e
+
+↓
+
+Selecionar:
+01/08/2026 até 31/08/2026
+
+↓
+
+Clicar:
+BAIXAR
+
+↓
+
+Sistema consulta automaticamente
+
+↓
+
+XMLs são salvos
+
+↓
+
+Duplicidades são ignoradas
+
+↓
+
+Banco é atualizado
+
+↓
+
+Usuário pesquisa documentos
+
+↓
+
+Seleciona empresa
+
+↓
+
+Exporta todos os XMLs em ZIP
+```
+
+E também:
+
+```text
+Abrir:
+Recuperação Histórica
+
+↓
+
+Importar:
+chaves_2024.xlsx
+
+↓
+
+Sistema analisa 50.000 chaves
+
+↓
+
+Identifica os tipos
+
+↓
+
+Remove duplicadas
+
+↓
+
+Compara com o acervo
+
+↓
+
+Mostra quais estão faltando
+
+↓
+
+Tenta recuperação pelos providers configurados
+
+↓
+
+Salva os XMLs encontrados
+
+↓
+
+Entrega relatório exato dos documentos não recuperados
+```
+
+---
+
+# 60. REGRA MAIS IMPORTANTE
+
+O sistema deve possuir um único acervo central.
+
+Independentemente da origem:
+
+```text
+SEF/SC
+Ambiente Nacional
+API histórica
+XML importado
+ZIP antigo
+ERP
+```
+
+depois que o XML entra no WGS DF-e Manager, ele passa a fazer parte do mesmo acervo.
+
+O usuário não deve precisar saber de qual fonte veio para utilizá-lo.
+
+A origem deve ficar registrada somente para auditoria.
+
+---
+
+# 61. TRATAMENTO DE DOCUMENTOS FALTANTES
+
+Nunca interpretar:
+
+```text
+não retornado pelo Web Service
+```
+
+como:
+
+```text
+documento não existe
+```
+
+Utilizar estados diferentes:
+
+```text
+Disponível
+
+Não encontrado nesta fonte
+
+Fora da janela de disponibilidade
+
+Recuperação pendente
+
+Certificado necessário
+
+Sem autorização
+
+Chave inválida
+
+Erro temporário
+
+Definitivamente não recuperado
+```
+
+---
+
+# 62. TELA DE COBERTURA DO ACERVO
+
+Criar futuramente, mas já preparar banco para isso.
+
+Exemplo:
+
+```text
+EMPRESA ABC
+
+2024
+
+Chaves conhecidas:
+18.524
+
+XML disponíveis:
+18.301
+
+Cobertura:
+98,80%
+
+Faltantes:
+223
+```
+
+Isso será uma das funções mais importantes do programa.
+
+---
+
+# 63. CERTIFICADO DO ESCRITÓRIO X CERTIFICADO DO CLIENTE
+
+O sistema deverá suportar os dois conceitos.
+
+Exemplo:
+
+```text
+Certificado do escritório/contador
+```
+
+para serviços que autorizem consulta através do vínculo contábil.
+
+E:
+
+```text
+Certificado próprio do cliente
+```
+
+para serviços que exijam certificado do participante do documento.
+
+Não presumir que todo provider aceita o certificado do contador.
+
+Cada provider deverá declarar seu requisito.
+
+---
+
+# 64. FUTURA VERSÃO COMERCIAL
+
+Quando o sistema interno estiver estável, deverá ser possível criar uma edição comercial.
+
+Possíveis planos futuros:
+
+```text
+Starter
+Professional
+Contábil
+Enterprise
+```
+
+Mas isso NÃO deverá ser implementado agora.
+
+A versão interna será utilizada também como ambiente real para amadurecer:
+
+* estabilidade;
+* interface;
+* velocidade;
+* regras fiscais;
+* integrações;
+* recuperação histórica.
+
+Somente depois pensar em venda.
+
+---
+
+# 65. PRIMEIRA TAREFA DO AGENTE DE DESENVOLVIMENTO
+
+Antes de começar a implementar Web Services fiscais:
+
+1. analisar este documento integralmente;
+2. analisar os arquivos técnicos fornecidos pelo usuário;
+3. identificar os layouts e protocolos;
+4. propor a estrutura da solution;
+5. definir as entidades iniciais;
+6. criar arquitetura de providers;
+7. implementar banco e camada de domínio;
+8. implementar parser das chaves;
+9. implementar importação do acervo;
+10. somente então iniciar integração real com SEFAZ.
+
+Não iniciar criando centenas de linhas de SOAP diretamente na interface gráfica.
+
+---
+
+# 66. REGRA PARA DOCUMENTAÇÃO EXTERNA
+
+Sempre que uma integração fiscal depender de informação que possa ter mudado:
+
+consultar documentação oficial atual antes de implementar.
+
+Priorizar:
+
+* Portal Nacional NF-e;
+* Portal CT-e;
+* SEF/SC;
+* SVRS;
+* documentação oficial NFCom;
+* documentação oficial NFC-e.
+
+Se houver divergência entre material antigo e documentação atual:
+
+não adivinhar.
+
+Documentar a divergência e adotar o comportamento oficial vigente.
+
+---
+
+# 67. RESULTADO ESPERADO
+
+Queremos construir uma ferramenta profissional de gestão de documentos fiscais eletrônicos que inicialmente resolva uma necessidade interna real do escritório.
+
+Ela deverá combinar:
+
+**simplicidade para o usuário**
+
+com
+
+**arquitetura robusta por baixo**.
+
+A aplicação deverá ser capaz de crescer de:
+
+```text
+Ferramenta interna da WGS
+```
+
+para:
+
+```text
+Produto comercial de gestão e recuperação de DF-e para escritórios contábeis
+```
+
+sem exigir uma reconstrução completa do sistema.
+
+Prioridades, nesta ordem:
+
+1. integridade fiscal;
+2. segurança;
+3. confiabilidade;
+4. recuperação correta;
+5. organização do acervo;
+6. facilidade de uso;
+7. desempenho;
+8. possibilidade de expansão comercial.
+
+Comece agora estruturando o projeto, propondo a arquitetura inicial e implementando a **FASE 1 — Fundação**, sem pular etapas e sem inventar endpoints ou regras fiscais que não estejam documentados.

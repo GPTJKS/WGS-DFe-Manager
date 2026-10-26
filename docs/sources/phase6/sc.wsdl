@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.satnfe.sef.sc.gov.br/ws/distribuicao-v2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.satnfe.sef.sc.gov.br/ws/distribuicao-v2" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Serviço de Distribuição das Notas Fiscais Eletrônicas</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.satnfe.sef.sc.gov.br/ws/distribuicao-v2">
+      <s:element name="NfeDownloadContab">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pXml">
+              <s:complexType mixed="true">
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="NfeDownloadContabResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="NfeDownloadContabResult">
+              <s:complexType mixed="true">
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="NfeDownloadContabSoapIn">
+    <wsdl:part name="parameters" element="tns:NfeDownloadContab" />
+  </wsdl:message>
+  <wsdl:message name="NfeDownloadContabSoapOut">
+    <wsdl:part name="parameters" element="tns:NfeDownloadContabResponse" />
+  </wsdl:message>
+  <wsdl:portType name="NFeDistribuicaoContabilSoap">
+    <wsdl:operation name="NfeDownloadContab">
+      <wsdl:input message="tns:NfeDownloadContabSoapIn" />
+      <wsdl:output message="tns:NfeDownloadContabSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="NFeDistribuicaoContabilSoap" type="tns:NFeDistribuicaoContabilSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="NfeDownloadContab">
+      <soap:operation soapAction="http://www.satnfe.sef.sc.gov.br/ws/distribuicao-v2/NfeDownloadContab" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="NFeDistribuicaoContabilSoap12" type="tns:NFeDistribuicaoContabilSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="NfeDownloadContab">
+      <soap12:operation soapAction="http://www.satnfe.sef.sc.gov.br/ws/distribuicao-v2/NfeDownloadContab" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="NFeDistribuicaoContabil">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Serviço de Distribuição das Notas Fiscais Eletrônicas</wsdl:documentation>
+    <wsdl:port name="NFeDistribuicaoContabilSoap" binding="tns:NFeDistribuicaoContabilSoap">
+      <soap:address location="https://satnfe.sef.sc.gov.br/ws/distribuicao/nfedownloadV2.asmx" />
+    </wsdl:port>
+    <wsdl:port name="NFeDistribuicaoContabilSoap12" binding="tns:NFeDistribuicaoContabilSoap12">
+      <soap12:address location="https://satnfe.sef.sc.gov.br/ws/distribuicao/nfedownloadV2.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

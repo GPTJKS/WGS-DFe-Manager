@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" >
+  <xs:element name="loteDistNFeSC">
+      <xs:complexType>
+        <xs:sequence>
+            
+              <xs:element name="distNFeSC" minOccurs="0" maxOccurs="50" >
+              
+                <xs:complexType>
+                <xs:sequence>
+                  <xs:any processContents="skip" namespace="##any" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                  <xs:attribute name="NSU" use="required">
+                    <xs:simpleType>
+                      <xs:annotation>
+                        <xs:documentation>NSU do documento na base de dados da SEF-SC</xs:documentation>
+                      </xs:annotation>
+                      <xs:restriction base="xs:long">
+                        <xs:totalDigits value="18"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  <xs:attribute name="chAcesso" use="optional">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string" id="idChave">
+                        <xs:annotation>
+                          <xs:documentation>Chave de Acesso do DFe</xs:documentation>
+                        </xs:annotation>
+                        <xs:whiteSpace value="preserve"/>
+                        <xs:pattern value="[0-9A-Z]{44}"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute> 
+
+                </xs:complexType>
+              </xs:element>
+        </xs:sequence>
+        <xs:attribute name="versao" use="required">
+          <xs:simpleType >
+            <xs:restriction base="xs:string">
+              <xs:annotation>
+                <xs:documentation>Versão do leiaute</xs:documentation>
+              </xs:annotation>
+              <xs:pattern value="\w*\.\w*"/>
+              <xs:maxLength value="5"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:complexType>
+  </xs:element>
+</xs:schema>

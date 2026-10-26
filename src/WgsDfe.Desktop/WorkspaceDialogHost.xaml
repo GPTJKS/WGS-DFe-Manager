@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="WgsDfe.Desktop.WorkspaceDialogHost" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:WgsDfe.Desktop" Visibility="Collapsed" Focusable="False" PreviewKeyDown="Overlay_KeyDown">
+ <Grid x:Name="Overlay" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" FocusManager.IsFocusScope="True">
+  <Border x:Name="Scrim" Background="#6614161B"/>
+  <Grid x:Name="DialogArea" Margin="256,52,0,30">
+   <Border x:Name="Frame" Background="White" BorderBrush="#DFDCD4" BorderThickness="1" CornerRadius="18" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True">
+    <Grid><Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+     <Border Background="#FFFFFF" CornerRadius="18,18,0,0" BorderBrush="#E6E4DD" BorderThickness="0,0,0,1" Padding="18,0,10,0"><DockPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button x:Name="BackgroundButton" Content="Continuar em segundo plano" Click="Background_Click" Visibility="Collapsed" Padding="10,6" Margin="0,0,8,0"/><Button x:Name="MaximizeButton" Content="&#xE739;" FontFamily="Segoe MDL2 Assets" Width="32" Height="32" Padding="0" Margin="0,0,4,0" ToolTip="Maximizar / restaurar" AutomationProperties.Name="Maximizar / restaurar janela interna" Click="Maximize_Click"/><Button x:Name="CloseButton" Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" Width="32" Height="32" Padding="0" Margin="0" ToolTip="Fechar" AutomationProperties.Name="Fechar janela interna" Click="Close_Click"/></StackPanel>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Ellipse Width="8" Height="8" Fill="#E08A34" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBlock x:Name="DialogTitle" FontFamily="{x:Static local:Typography.Ui}" FontWeight="Bold" FontSize="15.5" Foreground="#14161B" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></StackPanel>
+     </DockPanel></Border>
+     <Border Grid.Row="1" CornerRadius="0,0,18,18" Background="#FAF9F6" ClipToBounds="True"><ContentControl x:Name="Body" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/></Border>
+    </Grid>
+   </Border>
+  </Grid>
+  <Border x:Name="DiscardPrompt" Visibility="Collapsed" Background="#6614161B" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle">
+   <Border Width="420" Padding="24" CornerRadius="18" Background="White" BorderBrush="#DFDCD4" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center"><StackPanel><TextBlock Text="Descartar alterações?" FontFamily="{x:Static local:Typography.Ui}" FontSize="18" FontWeight="SemiBold" Foreground="#14161B"/><TextBlock Text="Há alterações que ainda não foram salvas. Você pode continuar editando ou fechar esta janela." Margin="0,10,0,20" TextWrapping="Wrap" Foreground="#646059"/><WrapPanel HorizontalAlignment="Right"><Button x:Name="ContinueEditing" Content="Continuar editando" Click="Continue_Click"/><Button Content="Descartar alterações" Style="{StaticResource PrimaryButton}" Click="Discard_Click"/></WrapPanel></StackPanel></Border>
+  </Border>
+ </Grid>
+</UserControl>

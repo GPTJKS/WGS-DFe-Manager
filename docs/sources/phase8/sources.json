@@ -1,0 +1,20 @@
+[
+  {
+    "path": "nfce.wsdl",
+    "url": "https://dfe.sat.sef.sc.gov.br/nfce/ws/distribuicao/DistribuicaoNfceDownload.asmx?WSDL",
+    "retrievedAt": "2026-10-18",
+    "sha256": "d691601b8701cbfcef00e8a3a41acda393d168194bffe85d1943bd73a208ccaa"
+  },
+  {
+    "path": "official-service.html",
+    "url": "https://www.sef.sc.gov.br/saiba-mais/web-service-para-download-de-nfce",
+    "retrievedAt": "2026-10-18",
+    "sha256": "b0e1660d48631925f56132aff419e0634871098fffdec3630ff5fe38ec875cab"
+  },
+  {
+    "path": "../BT 2026-003 - Servico de Distribuicao de Nota Fiscal de Consumidor Eletronica  - v100-1.pdf",
+    "url": "https://www.sef.sc.gov.br/api/download?id=8609&mime=application/pdf",
+    "origin": "User-provided PDF; title/version confirmed against official publication",
+    "sha256": "cb2cb73d65c2691ef21a910771cd1069b7f8ff3b94610736ba28daee0c7b0422"
+  }
+]

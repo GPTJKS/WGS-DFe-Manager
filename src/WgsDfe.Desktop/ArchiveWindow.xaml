@@ -1,0 +1,496 @@
+<local:WorkspaceView x:Class="WgsDfe.Desktop.ArchiveWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:local="clr-namespace:WgsDfe.Desktop" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Documentos baixados" Background="{StaticResource CanvasBrush}">
+ <local:WorkspaceView.Resources>
+  <Style TargetType="Button" BasedOn="{StaticResource AppButton}"><Setter Property="Padding" Value="10,4"/><Setter Property="Margin" Value="0,0,5,3"/><Setter Property="MinHeight" Value="28"/></Style>
+  <Style TargetType="ToggleButton" BasedOn="{StaticResource AppToggleButton}"><Setter Property="Padding" Value="10,4"/><Setter Property="Margin" Value="0,0,5,3"/><Setter Property="MinHeight" Value="28"/></Style>
+  <Style TargetType="TextBox" BasedOn="{StaticResource AppTextBox}"><Setter Property="Padding" Value="6,4"/><Setter Property="Margin" Value="0,0,5,3"/><Setter Property="MinHeight" Value="28"/></Style>
+  <Style TargetType="ComboBox" BasedOn="{StaticResource AppComboBox}"><Setter Property="Padding" Value="6,4"/><Setter Property="Margin" Value="0,0,5,3"/><Setter Property="MinHeight" Value="28"/></Style>
+ </local:WorkspaceView.Resources>
+ <Grid Margin="{StaticResource PageInset}">
+  <Grid.RowDefinitions>
+   <RowDefinition Height="Auto"/>
+   <RowDefinition Height="*"/>
+   <RowDefinition Height="Auto"/>
+  </Grid.RowDefinitions>
+
+  <!-- TOP HEADER & CONTROLS ZONE -->
+  <StackPanel Grid.Row="0">
+   <!-- Page Title -->
+   <DockPanel Margin="0,0,0,5">
+    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+     <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="6" Padding="8,2" Margin="0,0,6,0">
+      <StackPanel Orientation="Horizontal">
+       <Ellipse Width="6" Height="6" Fill="#10B981" VerticalAlignment="Center" Margin="0,0,5,0"/>
+       <TextBlock Text="Armazenamento seguro" FontSize="10.5" FontWeight="SemiBold" Foreground="#065F46"/>
+      </StackPanel>
+     </Border>
+    </StackPanel>
+    <StackPanel>
+     <StackPanel Orientation="Horizontal" Margin="0,0,0,1">
+      <Ellipse Width="7" Height="7" Fill="#E08A34" VerticalAlignment="Center" Margin="0,0,6,2"/>
+      <TextBlock Text="REPOSITÓRIO FISCAL &amp; AUDITORIA DE DOCUMENTOS XML" Style="{StaticResource Eyebrow}"/>
+     </StackPanel>
+     <WrapPanel VerticalAlignment="Center">
+      <TextBlock Text="Acervo Fiscal &amp; Auditoria XML" Style="{StaticResource PageTitle}"/>
+      <local:PillBadge Text="Repositório local" Margin="10,0,0,2"/>
+      <TextBlock Text=" · Consulte, visualize espelho gráfico (DANFE/DACTE), audite versões e exporte XMLs." Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+     </WrapPanel>
+    </StackPanel>
+   </DockPanel>
+
+   <!-- Action Ribbon / Toolbar -->
+   <Border Style="{StaticResource Card}" Padding="8,5" Margin="0,0,0,5">
+    <StackPanel x:Name="Toolbar">
+     <WrapPanel VerticalAlignment="Center">
+      <Button Content="Visualizar Nota (DANFE)" local:Ui.Icon="&#xE8A5;" Style="{StaticResource PrimaryButton}" Click="Details_Click" ToolTip="Visualizar espelho gráfico (DANFE / DACTE) e XML completo da nota selecionada"/>
+      <Button Content="Exportar XMLs" local:Ui.Icon="&#xEDE1;" Style="{StaticResource PrimaryButton}" Click="ExportFilters_Click" ToolTip="Exportar XMLs locais correspondentes aos filtros ativos"/>
+      <Button Content="Exportar seleção" Click="ExportSelected_Click" ToolTip="Exportar apenas os itens selecionados na listagem"/>
+      <Button Content="Histórico" Click="History_Click" ToolTip="Consultar histórico de exportações de XML realizadas"/>
+      <Button Content="Atualizar vínculos" Click="Links_Click" ToolTip="Atualizar vínculos das notas baixadas com as empresas cadastradas"/>
+      <Button Content="Salvar relatório" Click="Report_Click" ToolTip="Salvar relatório detalhado em planilha CSV da importação"/>
+      <ToggleButton x:Name="AdvancedDiagnosticToggle" Content="Diagnóstico avançado" local:Ui.Icon="&#xE9D5;" Click="AdvancedDiagnosticToggle_Click" ToolTip="Opções avançadas de conferência de integridade e importação manual"/>
+     </WrapPanel>
+
+     <!-- Collapsible Diagnostic Tools Strip -->
+     <Border x:Name="AdvancedDiagnosticPanel" Visibility="Collapsed" BorderBrush="#ECEAE3" BorderThickness="0,1,0,0" Margin="0,4,0,0" Padding="0,4,0,0">
+      <WrapPanel VerticalAlignment="Center">
+       <Button Content="Conferir integridade do acervo" Click="Integrity_Click" ToolTip="Verifica integridade SHA-256 e inventário físico dos arquivos"/>
+       <Button Content="Inspecionar versões e XML" Click="Details_Click" ToolTip="Auditoria profunda de arquivos, versões e XML cru"/>
+       <Button Content="Importar arquivos XML / ZIP" Click="ImportFiles_Click" ToolTip="Importar arquivos XML ou pacotes ZIP para o repositório local"/>
+       <Button Content="Importar pasta completa" Click="ImportFolder_Click" ToolTip="Importar pasta com múltiplos arquivos e subpastas para o acervo"/>
+      </WrapPanel>
+     </Border>
+    </StackPanel>
+   </Border>
+
+   <!-- Search & Quick Navigation Strip -->
+   <Border Style="{StaticResource Card}" Padding="8,5" Margin="0,0,0,5">
+    <DockPanel>
+     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Margin="6,0,0,0" VerticalAlignment="Center">
+      <Button x:Name="SearchBtn" Content="Pesquisar" Style="{StaticResource PrimaryButton}" local:Ui.Icon="&#xE721;" Click="Search_Click" Margin="0,0,5,0" ToolTip="Pesquisar no acervo local (Enter)"/>
+      <ToggleButton x:Name="AdvancedFiltersToggle" Content="Filtros avançados" local:Ui.Icon="&#xE71C;" Click="AdvancedFiltersToggle_Click" Margin="0,0,5,0" ToolTip="Exibir ou ocultar opções de filtros avançados"/>
+      <ToggleButton x:Name="FinancialVolumeToggle" Content="Volume financeiro" local:Ui.Icon="&#xE8C7;" Click="FinancialVolumeToggle_Click" Margin="0" ToolTip="Apuração e conferência do volume financeiro por período específico"/>
+     </StackPanel>
+     <TextBox x:Name="Search" local:Ui.Search="True" local:Ui.Placeholder="Filtrar por emitente, destinatário, CNPJ, número ou chave de 44 dígitos (Enter para pesquisar)…" KeyDown="Search_KeyDown"/>
+    </DockPanel>
+   </Border>
+
+   <!-- FINANCIAL VOLUME PANEL (Apuração Faturado / Cancelado / Líquido) -->
+   <Border x:Name="FinancialVolumePanel" Visibility="Collapsed" Style="{StaticResource Card}" Background="#FAF9F6" BorderBrush="#E0C297" BorderThickness="1.5" Padding="12,8" Margin="0,0,0,5">
+    <StackPanel>
+     <DockPanel Margin="0,0,0,6">
+      <Button DockPanel.Dock="Right" Content="✕ Fechar" Style="{StaticResource PeriodChipButton}" Padding="8,2" FontSize="11" Margin="0" Click="CloseFinancialVolume_Click" ToolTip="Fechar painel de volume financeiro"/>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+       <Border Width="24" Height="24" CornerRadius="6" Background="#FFF3E6" Margin="0,0,8,0" VerticalAlignment="Center">
+        <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" Foreground="#E08A34" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+       </Border>
+       <StackPanel VerticalAlignment="Center">
+        <TextBlock Text="VOLUME FINANCEIRO DO ACERVO" Style="{StaticResource Eyebrow}" Margin="0"/>
+        <TextBlock Text="Conferência de faturamento bruto autorizado, cancelamentos e resultado líquido por período de emissão" FontSize="11" Foreground="#646059"/>
+       </StackPanel>
+      </StackPanel>
+     </DockPanel>
+
+     <!-- Period Preset Chips & Action Row -->
+     <Border Background="#F7F6F2" BorderBrush="#E2DFD7" BorderThickness="1" CornerRadius="10" Padding="8,4" Margin="0,0,0,6">
+      <WrapPanel VerticalAlignment="Center">
+       <TextBlock Text="Período:" FontWeight="SemiBold" FontSize="11.5" Foreground="#646059" VerticalAlignment="Center" Margin="2,0,8,0"/>
+       <Border Background="#ECE9E1" BorderBrush="#DFDCD3" BorderThickness="1" CornerRadius="8" Padding="3,2" Margin="0,0,10,0" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+         <Button Content="Hoje" Style="{StaticResource PeriodChipButton}" Click="FinRange_Today_Click" ToolTip="Filtrar hoje"/>
+         <Button Content="Este mês" Style="{StaticResource PeriodChipButton}" Click="FinRange_ThisMonth_Click" ToolTip="Filtrar mês atual"/>
+         <Button Content="Mês anterior" Style="{StaticResource PeriodChipButton}" Click="FinRange_LastMonth_Click" ToolTip="Filtrar mês anterior"/>
+         <Button Content="Últimos 30 dias" Style="{StaticResource PeriodChipButton}" Click="FinRange_Last30Days_Click" ToolTip="Filtrar últimos 30 dias"/>
+         <Button Content="Todo o acervo" Style="{StaticResource PeriodChipButton}" Click="FinRange_All_Click" ToolTip="Todo o acervo"/>
+        </StackPanel>
+       </Border>
+
+       <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+        <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="12.5" Foreground="#E08A34" VerticalAlignment="Center" Margin="0,0,6,0"/>
+        <TextBlock Text="De" FontSize="11.5" FontWeight="SemiBold" Foreground="#646059" VerticalAlignment="Center" Margin="0,0,5,0"/>
+        <DatePicker x:Name="FinFrom" Width="122" VerticalAlignment="Center"/>
+        <TextBlock Text="→" FontSize="12" FontWeight="Bold" Foreground="#E08A34" VerticalAlignment="Center" Margin="6,0"/>
+        <TextBlock Text="Até" FontSize="11.5" FontWeight="SemiBold" Foreground="#646059" VerticalAlignment="Center" Margin="0,0,5,0"/>
+        <DatePicker x:Name="FinTo" Width="122" VerticalAlignment="Center"/>
+       </StackPanel>
+
+       <Button Content="Calcular volume" Style="{StaticResource PrimaryButton}" local:Ui.Icon="&#xE72C;" Click="CalculateFinancialVolume_Click" MinHeight="28" Padding="12,4" Margin="0" ToolTip="Atualizar cálculo do volume financeiro com base no período selecionado"/>
+      </WrapPanel>
+     </Border>
+
+     <!-- 3 Bento KPI Cards -->
+     <Grid>
+      <Grid.ColumnDefinitions>
+       <ColumnDefinition Width="*"/>
+       <ColumnDefinition Width="*"/>
+       <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Card 1: Faturado Autorizado -->
+      <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E6E4DD" BorderThickness="1" CornerRadius="9" Padding="10,8" Margin="0,0,5,0">
+       <StackPanel>
+        <DockPanel Margin="0,0,0,2">
+         <Border DockPanel.Dock="Right" Background="#ECFDF5" CornerRadius="5" Padding="5,1">
+          <TextBlock x:Name="FinGrossBadge" Text="0 autorizados" FontSize="9.5" FontWeight="SemiBold" Foreground="#065F46"/>
+         </Border>
+         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Ellipse Width="6" Height="6" Fill="#10B981" VerticalAlignment="Center" Margin="0,0,5,0"/>
+          <TextBlock Text="VALOR FATURADO (AUTORIZADO)" Style="{StaticResource Eyebrow}" Margin="0"/>
+         </StackPanel>
+        </DockPanel>
+        <TextBlock x:Name="FinGrossValue" Text="R$ 0,00" FontFamily="{x:Static local:Typography.Ui}" FontSize="17" FontWeight="SemiBold" Foreground="#047857" Margin="0,1"/>
+        <TextBlock x:Name="FinGrossSub" Text="Soma das notas fiscais autorizadas no período" FontSize="10.5" Foreground="#646059"/>
+       </StackPanel>
+      </Border>
+
+      <!-- Card 2: Cancelado -->
+      <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E6E4DD" BorderThickness="1" CornerRadius="9" Padding="10,8" Margin="0,0,5,0">
+       <StackPanel>
+        <DockPanel Margin="0,0,0,2">
+         <Border DockPanel.Dock="Right" Background="#FFF1F2" CornerRadius="5" Padding="5,1">
+          <TextBlock x:Name="FinCancelledBadge" Text="0 cancelados" FontSize="9.5" FontWeight="SemiBold" Foreground="#9F1239"/>
+         </Border>
+         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Ellipse Width="6" Height="6" Fill="#E11D48" VerticalAlignment="Center" Margin="0,0,5,0"/>
+          <TextBlock Text="VALOR CANCELADO (ESTORNOS)" Style="{StaticResource Eyebrow}" Margin="0"/>
+         </StackPanel>
+        </DockPanel>
+        <TextBlock x:Name="FinCancelledValue" Text="R$ 0,00" FontFamily="{x:Static local:Typography.Ui}" FontSize="17" FontWeight="SemiBold" Foreground="#BE123C" Margin="0,1"/>
+        <TextBlock x:Name="FinCancelledSub" Text="Notas canceladas por evento fiscal homologado" FontSize="10.5" Foreground="#646059"/>
+       </StackPanel>
+      </Border>
+
+      <!-- Card 3: Líquido Real -->
+      <Border Grid.Column="2" Background="#F8F6F0" BorderBrush="#DFDCD4" BorderThickness="1" CornerRadius="9" Padding="10,8">
+       <StackPanel>
+        <DockPanel Margin="0,0,0,2">
+         <Border DockPanel.Dock="Right" Background="#FFF3E6" CornerRadius="5" Padding="5,1">
+          <TextBlock x:Name="FinNetBadge" Text="Líquido efetivo" FontSize="9.5" FontWeight="SemiBold" Foreground="#C2410C"/>
+         </Border>
+         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Ellipse Width="6" Height="6" Fill="#E08A34" VerticalAlignment="Center" Margin="0,0,5,0"/>
+          <TextBlock Text="VALOR LÍQUIDO (EFETIVO)" Style="{StaticResource Eyebrow}" Margin="0"/>
+         </StackPanel>
+        </DockPanel>
+        <TextBlock x:Name="FinNetValue" Text="R$ 0,00" FontFamily="{x:Static local:Typography.Ui}" FontSize="17" FontWeight="SemiBold" Foreground="#14161B" Margin="0,1"/>
+        <TextBlock x:Name="FinNetSub" Text="Faturamento bruto deduzido de cancelamentos" FontSize="10.5" Foreground="#646059"/>
+       </StackPanel>
+      </Border>
+     </Grid>
+    </StackPanel>
+   </Border>
+
+   <!-- ADVANCED FILTERS PANEL (Clean 3-Column Layout) -->
+   <Border x:Name="AdvancedFiltersPanel" Visibility="Collapsed" Style="{StaticResource Card}" Background="#FAF9F6" BorderBrush="#DFDCD4" BorderThickness="1" Padding="12,8" Margin="0,0,0,5">
+    <StackPanel x:Name="Filters">
+     <DockPanel Margin="0,0,0,6">
+      <Button DockPanel.Dock="Right" Content="✕ Fechar" Style="{StaticResource PeriodChipButton}" Padding="8,2" FontSize="11" Margin="0" Click="CloseAdvancedFilters_Click" ToolTip="Fechar painel de filtros avançados"/>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+       <Border Width="24" Height="24" CornerRadius="6" Background="#EFECE6" Margin="0,0,8,0" VerticalAlignment="Center">
+        <TextBlock Text="&#xE71C;" FontFamily="Segoe MDL2 Assets" Foreground="#14161B" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+       </Border>
+       <TextBlock Text="FILTROS AVANÇADOS DO ACERVO" Style="{StaticResource Eyebrow}" Margin="0"/>
+      </StackPanel>
+     </DockPanel>
+
+     <Grid Margin="0,0,0,6">
+      <Grid.ColumnDefinitions>
+       <ColumnDefinition Width="1.2*"/>
+       <ColumnDefinition Width="1.2*"/>
+       <ColumnDefinition Width="1.3*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Coluna 1: Entidade e Modelo -->
+      <StackPanel Grid.Column="0" Margin="0,0,10,0">
+       <TextBlock Text="Empresa vinculada" Style="{StaticResource Eyebrow}"/>
+       <ComboBox x:Name="Company" DisplayMemberPath="Label" SelectedValuePath="Id" Margin="0,0,0,5"/>
+
+       <TextBlock Text="Modelo de documento" Style="{StaticResource Eyebrow}"/>
+       <ComboBox x:Name="Model" SelectedValuePath="Tag" SelectedIndex="0" Margin="0,0,0,5">
+        <ComboBoxItem Content="Todos os modelos"/>
+        <ComboBoxItem Content="NF-e (Mod. 55)" Tag="55"/>
+        <ComboBoxItem Content="NFC-e (Mod. 65)" Tag="65"/>
+        <ComboBoxItem Content="CT-e (Mod. 57)" Tag="57"/>
+        <ComboBoxItem Content="CT-e OS (Mod. 67)" Tag="67"/>
+        <ComboBoxItem Content="NFCom (Mod. 62)" Tag="62"/>
+       </ComboBox>
+
+       <Grid>
+        <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Visibility="Collapsed" Margin="0,0,3,0">
+         <TextBlock Text="Ambiente" Style="{StaticResource Eyebrow}"/>
+         <ComboBox x:Name="EnvironmentFilter" SelectedValuePath="Tag" SelectedIndex="0">
+          <ComboBoxItem Content="Todos"/>
+          <ComboBoxItem Content="Produção" Tag="1"/>
+          <ComboBoxItem Content="Homologação" Tag="2"/>
+         </ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="3,0,0,0">
+         <TextBlock Text="Situação declarada" Style="{StaticResource Eyebrow}"/>
+         <ComboBox x:Name="Status" SelectedValuePath="Tag" SelectedIndex="0">
+          <ComboBoxItem Content="Todas"/>
+          <ComboBoxItem Content="Autorizado (XML)" Tag="1"/>
+          <ComboBoxItem Content="Cancelado" Tag="2"/>
+          <ComboBoxItem Content="Denegado" Tag="3"/>
+          <ComboBoxItem Content="Não confirmado" Tag="0"/>
+         </ComboBox>
+        </StackPanel>
+       </Grid>
+      </StackPanel>
+
+      <!-- Coluna 2: Participantes e Identificação -->
+      <StackPanel Grid.Column="1" Margin="0,0,10,0">
+       <TextBlock Text="Papel da empresa" Style="{StaticResource Eyebrow}"/>
+       <ComboBox x:Name="Role" SelectedValuePath="Tag" SelectedIndex="0" Margin="0,0,0,5">
+        <ComboBoxItem Content="Todos os papéis"/>
+        <ComboBoxItem Content="Emitente" Tag="1"/>
+        <ComboBoxItem Content="Destinatário" Tag="2"/>
+        <ComboBoxItem Content="Ambos (Emitente ou Destinatário)" Tag="9"/>
+        <ComboBoxItem Content="Outros participantes" Tag="4"/>
+       </ComboBox>
+
+       <Grid Margin="0,0,0,5">
+        <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,3,0">
+         <TextBlock Text="CNPJ/CPF Emitente" Style="{StaticResource Eyebrow}"/>
+         <TextBox x:Name="Issuer" MaxLength="30" KeyDown="Search_KeyDown"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="3,0,0,0">
+         <TextBlock Text="CNPJ/CPF Destinatário" Style="{StaticResource Eyebrow}"/>
+         <TextBox x:Name="Recipient" MaxLength="30" KeyDown="Search_KeyDown"/>
+        </StackPanel>
+       </Grid>
+
+       <Grid>
+        <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="2*"/>
+         <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,3,0">
+         <TextBlock Text="Número da nota" Style="{StaticResource Eyebrow}"/>
+         <TextBox x:Name="Number" MaxLength="9" KeyDown="Search_KeyDown"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="3,0,0,0">
+         <TextBlock Text="Série" Style="{StaticResource Eyebrow}"/>
+         <TextBox x:Name="Series" MaxLength="3" KeyDown="Search_KeyDown"/>
+        </StackPanel>
+       </Grid>
+      </StackPanel>
+
+      <!-- Coluna 3: Período e Valores -->
+      <StackPanel Grid.Column="2">
+       <TextBlock Text="Período de emissão" Style="{StaticResource Eyebrow}"/>
+       <Grid Margin="0,0,0,3">
+        <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,3,0">
+         <TextBlock Text="De" FontSize="10.5" Foreground="#646059"/>
+         <DatePicker x:Name="From"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="3,0,0,0">
+         <TextBlock Text="Até" FontSize="10.5" Foreground="#646059"/>
+         <DatePicker x:Name="To"/>
+        </StackPanel>
+       </Grid>
+       <Border Background="#ECE9E1" BorderBrush="#DFDCD3" BorderThickness="1" CornerRadius="8" Padding="2,2" Margin="0,2,0,5" HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+         <Button Content="Hoje" Style="{StaticResource PeriodChipButton}" Click="FilterRange_Today_Click" ToolTip="Filtrar hoje" FontSize="10.5" Padding="7,2" MinHeight="22"/>
+         <Button Content="Este mês" Style="{StaticResource PeriodChipButton}" Click="FilterRange_ThisMonth_Click" ToolTip="Filtrar mês atual" FontSize="10.5" Padding="7,2" MinHeight="22"/>
+         <Button Content="Mês anterior" Style="{StaticResource PeriodChipButton}" Click="FilterRange_LastMonth_Click" ToolTip="Filtrar mês anterior" FontSize="10.5" Padding="7,2" MinHeight="22"/>
+         <Button Content="Limpar datas" Style="{StaticResource PeriodChipButton}" Click="FilterRange_ClearDates_Click" ToolTip="Limpar datas selecionadas" FontSize="10.5" Padding="7,2" MinHeight="22"/>
+        </StackPanel>
+       </Border>
+
+       <TextBlock Text="Faixa de valor (R$)" Style="{StaticResource Eyebrow}"/>
+       <Grid Margin="0,0,0,6">
+        <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,3,0">
+         <TextBlock Text="Mínimo" FontSize="10.5" Foreground="#646059"/>
+         <TextBox x:Name="Minimum" KeyDown="Search_KeyDown"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="3,0,0,0">
+         <TextBlock Text="Máximo" FontSize="10.5" Foreground="#646059"/>
+         <TextBox x:Name="Maximum" KeyDown="Search_KeyDown"/>
+        </StackPanel>
+       </Grid>
+
+       <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Limpar tudo" Style="{StaticResource PeriodChipButton}" Click="Clear_Click" Margin="0" MinHeight="26" Padding="8,3" ToolTip="Limpar todos os campos dos filtros"/>
+        <Button Content="Aplicar filtros" Style="{StaticResource PrimaryButton}" Click="Search_Click" Margin="0,0,5,0" MinHeight="26" Padding="12,3"/>
+       </DockPanel>
+      </StackPanel>
+     </Grid>
+    </StackPanel>
+   </Border>
+  </StackPanel>
+
+  <!-- MAIN WORKSPACE TABS & DATAGRID -->
+  <TabControl Grid.Row="1" x:Name="Tabs">
+   <!-- ABA 1: DOCUMENTOS -->
+   <TabItem Header="Documentos">
+    <Grid>
+     <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="Auto"/>
+     </Grid.ColumnDefinitions>
+
+     <DataGrid RowHeight="38" x:Name="Documents" IsReadOnly="True" AutoGenerateColumns="False" SelectionMode="Single" CanUserAddRows="False" MouseDoubleClick="Documents_DoubleClick">
+      <DataGrid.Columns>
+       <DataGridTemplateColumn Header="MODELO" Width="72" MinWidth="68">
+        <DataGridTemplateColumn.CellTemplate>
+         <DataTemplate><local:PillBadge Text="{Binding ModelLabel}"/></DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+       </DataGridTemplateColumn>
+       <DataGridTextColumn Header="AMBIENTE" Binding="{Binding EnvironmentLabel}" Width="92" ElementStyle="{StaticResource CellText}" MinWidth="85"/>
+       <DataGridTextColumn Header="EMISSÃO" Binding="{Binding IssueDateLabel}" Width="88" ElementStyle="{StaticResource CellText}" MinWidth="82"/>
+       <DataGridTemplateColumn Header="Nº / SÉRIE" Width="92" MinWidth="85">
+        <DataGridTemplateColumn.CellTemplate>
+         <DataTemplate>
+          <StackPanel VerticalAlignment="Center">
+           <TextBlock Text="{Binding Number}" FontWeight="SemiBold" Foreground="#14161B"/>
+           <TextBlock Text="{Binding Series, StringFormat=Série {0}}" Style="{StaticResource Caption}" FontSize="10"/>
+          </StackPanel>
+         </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+       </DataGridTemplateColumn>
+       <DataGridTextColumn Header="EMITENTE" Binding="{Binding IssuerName}" Width="1.2*" MinWidth="130" ElementStyle="{StaticResource CellText}"/>
+       <DataGridTextColumn Header="DESTINATÁRIO" Binding="{Binding RecipientName}" Width="1*" MinWidth="130" ElementStyle="{StaticResource CellText}"/>
+       <DataGridTextColumn Header="TOTAL (R$)" Binding="{Binding Total, StringFormat=N2}" Width="92" MinWidth="85">
+        <DataGridTextColumn.ElementStyle>
+         <Style TargetType="TextBlock" BasedOn="{StaticResource CellText}">
+          <Setter Property="FontWeight" Value="Bold"/>
+          <Setter Property="Foreground" Value="#14161B"/>
+         </Style>
+        </DataGridTextColumn.ElementStyle>
+       </DataGridTextColumn>
+       <DataGridTemplateColumn Header="Situação declarada" Width="135" MinWidth="125" CellTemplate="{StaticResource DocumentStatus}"/>
+      </DataGrid.Columns>
+     </DataGrid>
+
+     <!-- Right Contextual Inspector Drawer -->
+     <Border Grid.Column="1" Width="235" Margin="8,0,0,0" Padding="12,10" DataContext="{Binding SelectedItem, ElementName=Documents}">
+      <Border.Style>
+       <Style TargetType="Border" BasedOn="{StaticResource Card}">
+        <Setter Property="Background" Value="#FAF9F6"/>
+        <Style.Triggers>
+         <DataTrigger Binding="{Binding SelectedItem, ElementName=Documents}" Value="{x:Null}">
+          <Setter Property="Visibility" Value="Collapsed"/>
+         </DataTrigger>
+        </Style.Triggers>
+       </Style>
+      </Border.Style>
+      <DockPanel>
+       <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+        <Button Content="Visualizar Nota (DANFE)" local:Ui.Icon="&#xE8A5;" Style="{StaticResource PrimaryButton}" Click="Details_Click" HorizontalAlignment="Stretch" Margin="0,0,0,4" ToolTip="Visualizar espelho gráfico e XML"/>
+        <Button Content="Exportar XML selecionado" Click="ExportSelected_Click" HorizontalAlignment="Stretch" Margin="0" ToolTip="Exportar o XML desta nota"/>
+       </StackPanel>
+       <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+         <DockPanel Margin="0,0,0,5">
+          <Button DockPanel.Dock="Right" Content="✕" Style="{StaticResource PeriodChipButton}" Padding="6,1" FontSize="10" Margin="0" Click="CloseInspector_Click" ToolTip="Fechar painel do documento"/>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+           <Ellipse Width="6" Height="6" Fill="#E08A34" VerticalAlignment="Center" Margin="0,0,5,0"/>
+           <TextBlock Text="INSPECTOR DA NOTA FISCAL" Style="{StaticResource Eyebrow}" Margin="0"/>
+          </StackPanel>
+         </DockPanel>
+
+         <Border Background="#FFFFFF" BorderBrush="#E6E4DD" BorderThickness="1" CornerRadius="8" Padding="9,6" Margin="0,0,0,5">
+          <StackPanel>
+           <local:SelectableText FontWeight="SemiBold" FontSize="11"><local:SelectableText.Text><MultiBinding StringFormat="{}{0} · {1}" Mode="OneWay"><Binding Path="ModelLabel"/><Binding Path="StatusLabel"/></MultiBinding></local:SelectableText.Text></local:SelectableText>
+           <local:SelectableText FontWeight="Bold" FontSize="12.5" Foreground="#14161B"><local:SelectableText.Text><MultiBinding StringFormat="Nº {0} · Série {1}" Mode="OneWay"><Binding Path="Number"/><Binding Path="Series"/></MultiBinding></local:SelectableText.Text></local:SelectableText>
+           <local:SelectableText Text="{Binding Total, StringFormat=R$ {0:N2}, Mode=OneWay}" FontFamily="{x:Static local:Typography.Ui}" FontSize="16" FontWeight="SemiBold" Foreground="#14161B" Margin="0,2,0,0"/>
+          </StackPanel>
+         </Border>
+
+         <Border Background="#FFFFFF" BorderBrush="#E6E4DD" BorderThickness="1" CornerRadius="8" Padding="9,6" Margin="0,0,0,5">
+          <StackPanel>
+           <TextBlock Text="EMITENTE → DESTINATÁRIO" Style="{StaticResource Eyebrow}"/>
+           <local:SelectableText Text="{Binding IssuerName, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" Foreground="#14161B" ToolTip="{Binding IssuerName}"/>
+           <local:SelectableText Text="{Binding Issuer, Mode=OneWay}" FontFamily="{x:Static local:Typography.Mono}"/><TextBlock Text="↓" Foreground="#E08A34" FontWeight="Bold" FontSize="10.5" Margin="0,1"/>
+           <local:SelectableText Text="{Binding RecipientName, Mode=OneWay}" FontWeight="SemiBold" FontSize="11" Foreground="#4A4742" ToolTip="{Binding RecipientName}"/><local:SelectableText Text="{Binding Recipient, Mode=OneWay}" FontFamily="{x:Static local:Typography.Mono}"/>
+          </StackPanel>
+         </Border>
+
+         <Border Background="#F3F2EE" BorderBrush="#E4E1D8" BorderThickness="1" CornerRadius="8" Padding="9,6">
+          <StackPanel>
+           <TextBlock Text="CHAVE DE ACESSO (44 DÍGITOS)" Style="{StaticResource Eyebrow}"/>
+           <local:SelectableText Text="{Binding Key, Converter={x:Static local:KeyBlocksConverter.Instance}, Mode=OneWay}" FontFamily="{x:Static local:Typography.Mono}" FontSize="10.5" FontWeight="SemiBold" Foreground="#14161B" TextWrapping="Wrap" Margin="0,2,0,0" ToolTip="{Binding Key}"/><Button Content="Copiar chave" Click="CopyInspectorKey_Click" HorizontalAlignment="Left" Padding="7,3" Margin="0,6,0,0"/>
+          </StackPanel>
+         </Border>
+        </StackPanel>
+       </ScrollViewer>
+      </DockPanel>
+     </Border>
+    </Grid>
+   </TabItem>
+
+   <!-- ABA 2: EVENTOS -->
+   <TabItem Header="Eventos">
+    <DataGrid RowHeight="38" x:Name="Events" IsReadOnly="True" AutoGenerateColumns="False" SelectionMode="Single" CanUserAddRows="False" MouseDoubleClick="Documents_DoubleClick">
+     <DataGrid.Columns>
+      <DataGridTextColumn Header="Empresa" Binding="{Binding CompanyLabel}" Width="1.4*" MinWidth="160">
+       <DataGridTextColumn.ElementStyle>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource CellText}">
+         <Setter Property="FontWeight" Value="SemiBold"/>
+         <Setter Property="Foreground" Value="#14161B"/>
+        </Style>
+       </DataGridTextColumn.ElementStyle>
+      </DataGridTextColumn>
+      <DataGridTextColumn Header="Chave" Binding="{Binding Key}" Width="1.4*" MinWidth="180" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="AMBIENTE" Binding="{Binding EnvironmentLabel}" Width="92" ElementStyle="{StaticResource CellText}" MinWidth="85"/>
+      <DataGridTextColumn Header="Tipo" Binding="{Binding TypeLabel}" Width="150" ElementStyle="{StaticResource CellText}" MinWidth="135"/>
+      <DataGridTextColumn Header="Seq." Binding="{Binding Sequence}" Width="50" ElementStyle="{StaticResource CellText}" MinWidth="45"/>
+      <DataGridTextColumn Header="cStat" Binding="{Binding ResponseCode}" Width="85" ElementStyle="{StaticResource CellText}" MinWidth="75"/>
+      <DataGridTextColumn Header="Data original" Binding="{Binding Date}" Width="165" ElementStyle="{StaticResource CellText}" MinWidth="145"/>
+      <DataGridTextColumn Header="Protocolo" Binding="{Binding Protocol}" Width="130" ElementStyle="{StaticResource CellText}" MinWidth="115"/>
+      <DataGridTextColumn Header="Versões" Binding="{Binding Versions}" Width="60" ElementStyle="{StaticResource CellText}" MinWidth="55"/>
+     </DataGrid.Columns>
+    </DataGrid>
+   </TabItem>
+
+   <!-- ABA 3: ÚLTIMA IMPORTAÇÃO -->
+   <TabItem Header="Última importação">
+    <DataGrid RowHeight="36" x:Name="ImportRows" IsReadOnly="True" AutoGenerateColumns="False" CanUserAddRows="False">
+     <DataGrid.Columns>
+      <DataGridTextColumn Header="Item" Binding="{Binding Number}" Width="50" ElementStyle="{StaticResource CellText}" MinWidth="45"/>
+      <DataGridTextColumn Header="Origem" Binding="{Binding Source}" Width="2*" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Resultado" Binding="{Binding Result}" Width="150" ElementStyle="{StaticResource CellText}" MinWidth="140"/>
+      <DataGridTextColumn Header="Motivo" Binding="{Binding Reason}" Width="2*" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Chave" Binding="{Binding Key}" Width="280" ElementStyle="{StaticResource CellText}" MinWidth="260"/>
+     </DataGrid.Columns>
+    </DataGrid>
+   </TabItem>
+
+   <!-- ABA 4: INTEGRIDADE -->
+   <TabItem Header="Integridade">
+    <DataGrid RowHeight="36" x:Name="IntegrityRows" IsReadOnly="True" AutoGenerateColumns="True" CanUserAddRows="False"/>
+   </TabItem>
+  </TabControl>
+
+  <!-- BOTTOM STATUS & PAGER BAR -->
+  <Border Grid.Row="2" Background="{StaticResource SoftBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="0,0,12,12" Padding="12,5" Margin="0,4,0,0">
+   <StackPanel>
+    <DockPanel>
+     <WrapPanel x:Name="Pager" DockPanel.Dock="Left" VerticalAlignment="Center">
+      <Button Content="Anterior" Click="Previous_Click" Margin="0,0,5,0" Padding="8,3" MinHeight="26"/>
+      <TextBlock x:Name="PageText" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="11.5" Margin="4,0,8,0"/>
+      <Button Content="Próxima" Click="Next_Click" Margin="0" Padding="8,3" MinHeight="26"/>
+     </WrapPanel>
+     <Button x:Name="CancelButton" Content="Cancelar operação" DockPanel.Dock="Right" IsEnabled="False" Click="Cancel_Click" Margin="6,0,0,0" Padding="8,3" MinHeight="26"/>
+     <TextBlock x:Name="Message" TextWrapping="Wrap" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource MutedBrush}" FontSize="11.5"/>
+    </DockPanel>
+    <ProgressBar x:Name="BusyBar" Height="3" IsIndeterminate="True" Visibility="Collapsed" Margin="0,4,0,0"/>
+   </StackPanel>
+  </Border>
+ </Grid>
+</local:WorkspaceView>

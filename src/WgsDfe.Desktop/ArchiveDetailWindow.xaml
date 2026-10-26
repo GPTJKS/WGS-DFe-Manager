@@ -1,0 +1,61 @@
+<local:WorkspaceView x:Class="WgsDfe.Desktop.ArchiveDetailWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:local="clr-namespace:WgsDfe.Desktop" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Visualizador de Nota Fiscal, Versões e XML" Background="{StaticResource CanvasBrush}">
+ <Grid Margin="14,10">
+  <Grid.RowDefinitions>
+   <RowDefinition Height="Auto"/>
+   <RowDefinition Height="135" MinHeight="90"/>
+   <RowDefinition Height="Auto"/>
+   <RowDefinition Height="*" MinHeight="180"/>
+   <RowDefinition Height="Auto"/>
+  </Grid.RowDefinitions>
+  <Border Style="{StaticResource Card}" Padding="12,7" Margin="0,0,0,6" Background="#FAF9F6">
+   <DockPanel>
+    <Border DockPanel.Dock="Left" Width="28" Height="28" CornerRadius="7" Background="#FFF3E6" Margin="0,0,10,0" VerticalAlignment="Center">
+     <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#E08A34" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Border>
+    <TextBlock x:Name="Heading" FontSize="12" FontWeight="SemiBold" Foreground="#14161B" TextWrapping="Wrap" VerticalAlignment="Center"/>
+   </DockPanel>
+  </Border>
+  <TabControl Grid.Row="1" Padding="4">
+   <TabItem Header="Versões preservadas (selecione a versão abaixo)">
+    <DataGrid x:Name="Versions" RowHeight="32" IsReadOnly="True" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+     <DataGrid.Columns>
+      <DataGridCheckBoxColumn Header="Principal" Binding="{Binding IsPrimary}" Width="72" MinWidth="65"/>
+      <DataGridCheckBoxColumn Header="Conflito" Binding="{Binding Conflict}" Width="68" MinWidth="60"/>
+      <DataGridTextColumn Header="cStat" Binding="{Binding ResponseCode}" Width="68" ElementStyle="{StaticResource CellText}" MinWidth="60"/>
+      <DataGridTextColumn Header="Tamanho (Bytes)" Binding="{Binding Bytes, StringFormat=N0}" Width="110" ElementStyle="{StaticResource CellText}" MinWidth="95"/>
+      <DataGridTextColumn Header="SHA-256" Binding="{Binding Hash}" Width="*" MinWidth="180" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Caminho relativo no acervo" Binding="{Binding Path}" Width="1.6*" MinWidth="220" ElementStyle="{StaticResource CellText}"/>
+     </DataGrid.Columns>
+    </DataGrid>
+   </TabItem>
+   <TabItem Header="Eventos vinculados">
+    <DataGrid x:Name="Events" RowHeight="32" IsReadOnly="True" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single" VerticalScrollBarVisibility="Auto">
+     <DataGrid.Columns>
+      <DataGridTextColumn Header="Empresa" Binding="{Binding CompanyLabel}" Width="1.4*" MinWidth="140" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Tipo de Evento" Binding="{Binding TypeLabel}" Width="160" MinWidth="130" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Seq." Binding="{Binding Sequence}" Width="55" MinWidth="50" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="cStat" Binding="{Binding ResponseCode}" Width="65" MinWidth="55" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Protocolo" Binding="{Binding Protocol}" Width="140" MinWidth="120" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Data do Evento" Binding="{Binding Date}" Width="170" MinWidth="140" ElementStyle="{StaticResource CellText}"/>
+      <DataGridTextColumn Header="Versões" Binding="{Binding Versions}" Width="68" MinWidth="60" ElementStyle="{StaticResource CellText}"/>
+     </DataGrid.Columns>
+    </DataGrid>
+   </TabItem>
+  </TabControl>
+  <WrapPanel Grid.Row="2" Margin="0,6">
+   <Button x:Name="VisualButton" Content="Visualizar Nota Fiscal (DANFE / Tributação)" local:Ui.Icon="&#xE8A5;" Style="{StaticResource PrimaryButton}" Click="Visual_Click" Padding="12,5" Margin="0,0,8,0"/>
+   <Button x:Name="DownloadXmlButton" Content="Baixar XML" local:Ui.Icon="&#xE896;" Click="DownloadXml_Click" Padding="12,5" Margin="0,0,8,0" ToolTip="Baixar exclusivamente o arquivo XML original desta nota fiscal"/>
+   <Button x:Name="ViewButton" Content="Ver XML da versão selecionada" local:Ui.Icon="&#xE943;" Click="View_Click" Padding="12,5" Margin="0,0,8,0"/>
+   <Button x:Name="EventButton" Content="Carregar versões do evento selecionado" Click="Event_Click" Padding="12,5"/>
+  </WrapPanel>
+  <TabControl Grid.Row="3" x:Name="ViewerTabs" Padding="4">
+   <TabItem Header="Espelho Gráfico da Nota Fiscal (DANFE / DACTE &amp; Tributação)">
+    <local:DanfeViewerControl x:Name="DanfeViewer"/>
+   </TabItem>
+   <TabItem Header="XML Original Completo">
+    <TextBox x:Name="Xml" IsReadOnly="True" FontFamily="{x:Static local:Typography.Mono}" FontSize="12" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+   </TabItem>
+  </TabControl>
+  <TextBlock Grid.Row="4" x:Name="Message" FontSize="11.5" Foreground="#646059" TextWrapping="Wrap" Margin="0,6,0,0" Text="Conflitos são preservados para revisão; nenhuma versão é excluída ou sobrescrita."/>
+ </Grid>
+</local:WorkspaceView>

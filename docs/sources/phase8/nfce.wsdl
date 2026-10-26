@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.satnfce.sef.sc.gov.br/ws/distribuicao-v1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.satnfce.sef.sc.gov.br/ws/distribuicao-v1" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Serviço de Distribuição das Notas Fiscais de Consumidor Eletrônica</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.satnfce.sef.sc.gov.br/ws/distribuicao-v1">
+      <s:element name="nfceDownloadContab">
+        <s:complexType>
+          <s:sequence>
+            <s:any minOccurs="0" maxOccurs="1" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="nfceDownloadContabResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="nfceDownloadContabResult">
+              <s:complexType mixed="true">
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="nfceDownloadContabSoapIn">
+    <wsdl:part name="parameters" element="tns:nfceDownloadContab" />
+  </wsdl:message>
+  <wsdl:message name="nfceDownloadContabSoapOut">
+    <wsdl:part name="parameters" element="tns:nfceDownloadContabResponse" />
+  </wsdl:message>
+  <wsdl:portType name="NfceDistribuicaoContabilSoap">
+    <wsdl:operation name="NfceDownloadContab">
+      <wsdl:input name="nfceDownloadContab" message="tns:nfceDownloadContabSoapIn" />
+      <wsdl:output name="nfceDownloadContab" message="tns:nfceDownloadContabSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="NfceDistribuicaoContabilSoap" type="tns:NfceDistribuicaoContabilSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="NfceDownloadContab">
+      <soap:operation soapAction="http://www.satnfce.sef.sc.gov.br/ws/distribuicao-v1/nfceDownloadContab" style="document" />
+      <wsdl:input name="nfceDownloadContab">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="nfceDownloadContab">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="NfceDistribuicaoContabilSoap12" type="tns:NfceDistribuicaoContabilSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="NfceDownloadContab">
+      <soap12:operation soapAction="http://www.satnfce.sef.sc.gov.br/ws/distribuicao-v1/nfceDownloadContab" style="document" />
+      <wsdl:input name="nfceDownloadContab">
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="nfceDownloadContab">
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="NfceDistribuicaoContabil">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Serviço de Distribuição das Notas Fiscais de Consumidor Eletrônica</wsdl:documentation>
+    <wsdl:port name="NfceDistribuicaoContabilSoap" binding="tns:NfceDistribuicaoContabilSoap">
+      <soap:address location="https://dfe.sat.sef.sc.gov.br/nfce/ws/distribuicao/DistribuicaoNfceDownload.asmx" />
+    </wsdl:port>
+    <wsdl:port name="NfceDistribuicaoContabilSoap12" binding="tns:NfceDistribuicaoContabilSoap12">
+      <soap12:address location="https://dfe.sat.sef.sc.gov.br/nfce/ws/distribuicao/DistribuicaoNfceDownload.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

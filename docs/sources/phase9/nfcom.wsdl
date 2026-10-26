@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.satnfcom.sef.sc.gov.br/ws/distribuicao-v1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.satnfcom.sef.sc.gov.br/ws/distribuicao-v1" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Serviço de Distribuição das Notas Fiscais de Serviço de Comunicação Eletrônica</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.satnfcom.sef.sc.gov.br/ws/distribuicao-v1">
+      <s:element name="nfcomDownloadContab">
+        <s:complexType>
+          <s:sequence>
+            <s:any minOccurs="0" maxOccurs="1" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="nfcomDownloadContabResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="nfcomDownloadContabResult">
+              <s:complexType mixed="true">
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="nfcomDownloadContabSoapIn">
+    <wsdl:part name="parameters" element="tns:nfcomDownloadContab" />
+  </wsdl:message>
+  <wsdl:message name="nfcomDownloadContabSoapOut">
+    <wsdl:part name="parameters" element="tns:nfcomDownloadContabResponse" />
+  </wsdl:message>
+  <wsdl:portType name="NfcomDistribuicaoContabilSoap">
+    <wsdl:operation name="NfcomDownloadContab">
+      <wsdl:input name="nfcomDownloadContab" message="tns:nfcomDownloadContabSoapIn" />
+      <wsdl:output name="nfcomDownloadContab" message="tns:nfcomDownloadContabSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="NfcomDistribuicaoContabilSoap" type="tns:NfcomDistribuicaoContabilSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="NfcomDownloadContab">
+      <soap:operation soapAction="http://www.satnfcom.sef.sc.gov.br/ws/distribuicao-v1/nfcomDownloadContab" style="document" />
+      <wsdl:input name="nfcomDownloadContab">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="nfcomDownloadContab">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="NfcomDistribuicaoContabilSoap12" type="tns:NfcomDistribuicaoContabilSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="NfcomDownloadContab">
+      <soap12:operation soapAction="http://www.satnfcom.sef.sc.gov.br/ws/distribuicao-v1/nfcomDownloadContab" style="document" />
+      <wsdl:input name="nfcomDownloadContab">
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="nfcomDownloadContab">
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="NfcomDistribuicaoContabil">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Serviço de Distribuição das Notas Fiscais de Serviço de Comunicação Eletrônica</wsdl:documentation>
+    <wsdl:port name="NfcomDistribuicaoContabilSoap" binding="tns:NfcomDistribuicaoContabilSoap">
+      <soap:address location="https://dfe.sat.sef.sc.gov.br/nfcom/ws/distribuicao/DistribuicaoNfcomDownload.asmx" />
+    </wsdl:port>
+    <wsdl:port name="NfcomDistribuicaoContabilSoap12" binding="tns:NfcomDistribuicaoContabilSoap12">
+      <soap12:address location="https://dfe.sat.sef.sc.gov.br/nfcom/ws/distribuicao/DistribuicaoNfcomDownload.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

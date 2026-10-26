@@ -1,0 +1,26 @@
+[
+  {
+    "path": "nfcom.wsdl",
+    "url": "https://dfe.sat.sef.sc.gov.br/nfcom/ws/distribuicao/DistribuicaoNfcomDownload.asmx?WSDL",
+    "retrievedAt": "2026-10-18",
+    "sha256": "e99eb6b47a433481c1c7f3b7f213698d0e1f8ef70695ced616a9905280cbd28d"
+  },
+  {
+    "path": "official-service.html",
+    "url": "https://www.sef.sc.gov.br/saiba-mais/web-service-para-download-de-nfcom",
+    "retrievedAt": "2026-10-18",
+    "sha256": "3d71ff74b848cc152151c06a196a1ce5b51086c13255ec770fd2ff6fb899249d"
+  },
+  {
+    "path": "BT_SC_2026_003_NFCom_v100-1.pdf",
+    "url": "https://www.sef.sc.gov.br/api/download?id=8608&mime=application/pdf",
+    "retrievedAt": "2026-10-18",
+    "sha256": "8a20356b9f3c5bee1a7c3a454bf066f63402afeeacd28a82db40828430f005c9"
+  },
+  {
+    "path": "../phase4/NFCOM_Schemas_2026_004.zip",
+    "entry": "PL_NFCOM_1.00_NT2026.004 RTC_1.00/procNFCom_v1.00.xsd",
+    "entrySha256": "1a6f5d289e5d42f9cd35414ad3929f8c5e928bdc7e4c66b658507fc5cccab35a",
+    "observation": "National fiscal schema declares nfcomProc; SC distribution bulletin spells NFComProc. Full XSD validation is not claimed."
+  }
+]

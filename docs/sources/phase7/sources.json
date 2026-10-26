@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-16",
+  "sources": [
+    {
+      "file": "NT2015_002_v1_05.pdf",
+      "url": "https://www.cte.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=LLSQYxGtwv0%3D",
+      "sha256": "09ac54d699eaac5c5a0aa3ecf440daf71fa7924be076df64ab645a1978be3617"
+    },
+    {
+      "file": "distribution-schemas.zip",
+      "url": "https://www.cte.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=l6I2ehbBicE%3D",
+      "sha256": "f546a5792e2b70af28a825a944a34e0e91a78722d014be021d86318217f3b7b6"
+    },
+    {
+      "file": "cte-notes.html",
+      "url": "https://www.cte.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=Y0nErnoZpsg%3D",
+      "sha256": "9416b8a6af5d4f89c83746d502c38a2f2abe72fe72891850650996bb3ad5618d"
+    },
+    {
+      "file": "cte-schemas.html",
+      "url": "https://www.cte.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=0xlG1bdBass%3D",
+      "sha256": "d52877884e3ce17ca12e94fae0ba3cec9884aeeafc29cf6cb1885c801f3c5dd9"
+    },
+    {
+      "file": "cte-services.html",
+      "url": "https://www.cte.fazenda.gov.br/portal/webServices.aspx?tipoConteudo=wpdBtfbTMrw%3D",
+      "sha256": "171041e301db01bae53f9d81941d67c76e4586f4f237a262c1e9f8b61bcb9656"
+    },
+    {
+      "file": "cte-hom-services.html",
+      "url": "https://hom.cte.fazenda.gov.br/portal/webServices.aspx?tipoConteudo=wpdBtfbTMrw%3D",
+      "sha256": "21e0a6696576046072b79f8de874574e2b59b6c0f6dcc37d9b45c87a6c079873"
+    }
+  ],
+  "wsdl": "Access failed; pending Windows/certificate environment verification; no live fiscal requests."
+}

@@ -1,0 +1,45 @@
+<local:WorkspaceView x:Class="WgsDfe.Desktop.ExportWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:local="clr-namespace:WgsDfe.Desktop" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Exportar XML" Background="{StaticResource CanvasBrush}">
+ <local:WorkspaceView.Resources>
+  <Style TargetType="Button" BasedOn="{StaticResource AppButton}"><Setter Property="Margin" Value="0,0,8,6"/></Style>
+  <Style TargetType="CheckBox"><Setter Property="local:Motion.Animate" Value="True"/><Setter Property="Margin" Value="0,6,18,8"/></Style>
+ </local:WorkspaceView.Resources>
+ <Grid Margin="16"><Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <ScrollViewer x:Name="ExportBody" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
+   <StackPanel>
+    <TextBlock Text="Exportar XML" Style="{StaticResource PageTitle}"/>
+    <TextBlock x:Name="ScopeText" Text="Exporte os XMLs que atendem aos filtros, incluindo todas as páginas da lista." TextWrapping="Wrap" Style="{StaticResource Caption}" Margin="0,2,0,12"/>
+    <Border Style="{StaticResource Card}" Margin="0,0,0,12"><StackPanel>
+     <TextBlock Text="Empresas da exportação" Style="{StaticResource SectionTitle}"/>
+     <CheckBox x:Name="AllCompanies" Content="Selecionar todas as empresas" IsChecked="True" Checked="Scope_Changed" Unchecked="Scope_Changed" ToolTip="Desmarque para selecionar empresas específicas com Ctrl/Shift."/>
+     <AdornerDecorator ClipToBounds="True"><DataGrid x:Name="CompaniesGrid" Height="136" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Extended"><DataGrid.Columns><DataGridTextColumn Header="Empresa · Ctrl/Shift para selecionar várias" Binding="{Binding Label}" Width="*" ElementStyle="{StaticResource CellText}"/></DataGrid.Columns></DataGrid></AdornerDecorator>
+    </StackPanel></Border>
+     <Border x:Name="DestinationCard" Style="{StaticResource Card}" Margin="0,0,0,12"><StackPanel><TextBlock Text="Destino dos XMLs" Style="{StaticResource SectionTitle}"/>
+      <Grid Margin="0,8,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="DestinationBox" IsReadOnly="True" Margin="0,0,10,0" ToolTip="Será criada uma pasta nova no destino."/><Button Grid.Column="1" Content="Escolher destino" Click="Destination_Click"/></Grid>
+      <WrapPanel><Button Content="Conferir seleção" Click="Preview_Click"/><Button Content="Exportar para o destino" Click="Export_Click" Style="{StaticResource PrimaryButton}"/></WrapPanel><TextBlock x:Name="PreviewText" Style="{StaticResource Caption}" TextWrapping="Wrap"/>
+     </StackPanel></Border>
+    <Border Style="{StaticResource Card}" Margin="0,0,0,12"><StackPanel><TextBlock Text="Período e tipos" Style="{StaticResource SectionTitle}"/><StackPanel x:Name="Filters">
+     <WrapPanel><StackPanel Margin="0,4,16,8"><TextBlock Text="Emissão a partir de"/><DatePicker x:Name="From" Width="150"/></StackPanel><StackPanel Margin="0,4,16,8"><TextBlock Text="Até"/><DatePicker x:Name="To" Width="150"/></StackPanel><StackPanel Visibility="Collapsed" Margin="0,4,0,8"><TextBlock Text="Ambiente"/><ComboBox x:Name="EnvironmentBox" Width="230" SelectedIndex="1"><ComboBoxItem Content="Ambos (pastas separadas)"/><ComboBoxItem Content="Produção"/><ComboBoxItem Content="Homologação"/></ComboBox></StackPanel></WrapPanel>
+     <WrapPanel><CheckBox x:Name="NfeBox" Content="NF-e" IsChecked="True"/><CheckBox x:Name="CteBox" Content="CT-e" IsChecked="True"/><CheckBox x:Name="CteOsBox" Content="CT-e OS" IsChecked="True"/><CheckBox x:Name="NfceBox" Content="NFC-e" IsChecked="True"/><CheckBox x:Name="NfcomBox" Content="NFCom" IsChecked="True"/></WrapPanel>
+    </StackPanel></StackPanel></Border>
+    <StackPanel x:Name="Options">
+     <Border Style="{StaticResource Card}" Margin="0,0,0,12"><Expander Header="Opções de conteúdo e formato"><StackPanel>
+      <TextBlock Text="Empresa / situação / ano / mês / intervalo / tipo / ambiente" TextWrapping="Wrap" Style="{StaticResource Caption}" Margin="0,6,0,10"/>
+      <WrapPanel><StackPanel Margin="0,0,16,8"><TextBlock Text="Formato"/><ComboBox x:Name="FormatBox" Width="140" SelectedIndex="1"><ComboBoxItem Content="ZIP"/><ComboBoxItem Content="Pasta"/></ComboBox></StackPanel></WrapPanel>
+      <TextBlock Text="Conteúdo adicional" FontWeight="SemiBold" Margin="0,8,0,4"/>
+      <WrapPanel><CheckBox x:Name="SkipBox" Content="Ignorar XMLs ausentes/inválidos e mostrar no resumo"/></WrapPanel>
+      <WrapPanel><CheckBox x:Name="EventsBox" Content="Eventos das notas" IsChecked="True"/><CheckBox x:Name="OrphansBox" Content="Eventos sem nota"/><CheckBox x:Name="VersionsBox" Content="Outras versões"/><CheckBox x:Name="ConflictsBox" Content="Versões divergentes"/><CheckBox x:Name="UnassignedBox" Content="Incluir sem vínculo" ToolTip="XMLs sem cadastro são agrupados em SemVinculo."/></WrapPanel>
+
+     </StackPanel></Expander></Border>
+
+    </StackPanel>
+    <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Resultado por arquivo" Style="{StaticResource SectionTitle}" Margin="0,0,0,10"/>
+     <AdornerDecorator ClipToBounds="True"><DataGrid x:Name="ResultGrid" Height="220" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"><DataGrid.Columns><DataGridTextColumn Header="Arquivo no destino" Binding="{Binding Path}" Width="*" MinWidth="140" ElementStyle="{StaticResource CellText}"/><DataGridTextColumn Header="Tipo" Binding="{Binding Kind}" Width="Auto" MinWidth="85" ElementStyle="{StaticResource CellText}"/><DataGridTextColumn Header="Resultado da cópia" Binding="{Binding Result}" Width="220" ElementStyle="{StaticResource CellText}"/></DataGrid.Columns></DataGrid></AdornerDecorator>
+    </StackPanel></Border>
+   </StackPanel>
+  </ScrollViewer>
+  <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,10,0,0"><StackPanel>
+   <WrapPanel><Button x:Name="CancelButton" Content="Cancelar" IsEnabled="False" Click="Cancel_Click"/><Button Content="Abrir pasta" Click="OpenFolder_Click"/><Button Content="Copiar resumo" Click="CopySummary_Click"/></WrapPanel>
+   <TextBlock x:Name="Message" TextWrapping="Wrap" FontSize="12"/><TextBox x:Name="OutputPath" IsReadOnly="True" FontSize="11" BorderThickness="0" Background="Transparent" ToolTip="{Binding Text,RelativeSource={RelativeSource Self}}"/><ProgressBar x:Name="BusyBar" Height="4" IsIndeterminate="True" Visibility="Collapsed" Margin="0,4,0,0"/>
+  </StackPanel></Border>
+ </Grid>
+</local:WorkspaceView>
